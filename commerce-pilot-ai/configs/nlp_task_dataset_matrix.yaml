@@ -1,0 +1,118 @@
+schema_version: nlp-task-dataset-matrix-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+
+task_taxonomy:
+  SENTIMENT: READY_TO_DEFINE
+  SPEECH_ACT: READY_TO_DEFINE
+  OFFENSIVE_LANGUAGE_SAFETY: READY_TO_DEFINE
+  POLITENESS: BLOCKED_BY_DATA          # ADAB gated, not obtained
+  REVIEW_RATING: READY_TO_DEFINE
+  COMPLAINT_DETECTION: BLOCKED_BY_DATA  # no dataset carries a complaint-intent label
+  CUSTOMER_INTENT: BLOCKED_BY_DATA      # no dataset carries an intent label
+  ASPECT_TOPIC: DEFERRED                # no active dataset has aspect/topic annotations
+  EMOTION: BLOCKED_BY_DATA              # EmotionalTone not obtained
+  CODE_SWITCHING_ROBUSTNESS: BLOCKED_BY_DATA  # EESA/ArzEn not obtained
+
+# Evidence-driven mapping. A dataset appears under a task only if its native
+# labels genuinely support that task without relabelling-by-intuition.
+dataset_task_mapping:
+  SENTIMENT:
+    - dataset_id: egyptian_tweets_corpus_40k
+      label_field: label
+      native_scheme: binary(positive,negative)
+      mapping_type: EXACT
+    - dataset_id: astd
+      label_field: label
+      native_scheme: four_class(pos,neg,neutral,objective)
+      mapping_type: EXACT
+    - dataset_id: arsas
+      label_field: Sentiment_label
+      native_scheme: four_class(Positive,Negative,Neutral,Mixed)
+      mapping_type: EXACT
+    - dataset_id: amazon_appliances
+      label_field: overall (1-5 stars)
+      native_scheme: five_star_rating
+      mapping_type: PARTIAL
+      note: "Sentiment is DERIVED via an explicit documented mapping (Step 27), not native. Not usable until that mapping is ratified per-experiment."
+    - dataset_id: labr
+      label_field: rating (1-5 stars) / two-class balanced split
+      native_scheme: five_star_rating
+      mapping_type: PARTIAL
+      note: "Same rating-to-sentiment caveat as Amazon."
+
+  SPEECH_ACT:
+    - dataset_id: arsas
+      label_field: Speech_act_label
+      native_scheme: six_class(Assertion,Expression,Question,Request,Recommendation,Miscellaneous)
+      mapping_type: EXACT
+      note: "MUST remain a separate task/target from Sentiment_label in the same dataset. Never combined."
+
+  OFFENSIVE_LANGUAGE_SAFETY:
+    - dataset_id: mpold
+      label_field: Majority_Label
+      native_scheme: binary(Non-Offensive,Offensive)
+      mapping_type: EXACT
+      note: "FORBIDDEN_TO_MAP to sentiment or to any other task's labels."
+
+  REVIEW_RATING:
+    - dataset_id: amazon_appliances
+      label_field: overall (1-5 stars)
+      native_scheme: five_star_rating
+      mapping_type: EXACT
+    - dataset_id: labr
+      label_field: rating (1-5 stars)
+      native_scheme: five_star_rating
+      mapping_type: EXACT
+
+  POLITENESS:
+    - dataset_id: adab_politeness
+      label_field: politeness_class (per paper)
+      native_scheme: three_class(polite,impolite,neutral)
+      mapping_type: EXACT
+      status: BLOCKED_BY_DATA_NOT_OBTAINED
+
+  CODE_SWITCHING_ROBUSTNESS:
+    - dataset_id: eesa_named_dataset
+      label_field: unknown
+      native_scheme: unknown_pending_acquisition
+      mapping_type: NO_MAPPING
+      status: BLOCKED_BY_DATA_NOT_OBTAINED
+
+# Explicit forbidden mappings, stated for auditability.
+forbidden_mappings:
+  - "MPOLD Majority_Label -> SENTIMENT (offensive-language is not sentiment polarity)"
+  - "ArSAS Speech_act_label -> SENTIMENT (speech act is not sentiment polarity)"
+  - "Any dataset's star rating -> SENTIMENT without an explicit, per-experiment-documented rating-to-sentiment mapping (Step 27)"
+  - "ADAB politeness_class -> SENTIMENT or -> COMPLAINT_DETECTION (politeness is a distinct pragmatic dimension)"
+
+# Step 5: merge policy across dataset pairs actually relevant given the active portfolio.
+merge_policy:
+  - pair: [egyptian_tweets_corpus_40k, astd]
+    decision: MERGE_ALLOWED_WITH_RELABELLING_RULE
+    reasoning: >
+      Both are Egyptian-Arabic Twitter/X sentiment corpora, but Egyptian Tweets 40K
+      is binary (positive/negative) while ASTD is 4-class (pos/neg/neutral/objective).
+      A pooled binary-sentiment experiment is permissible only if ASTD's neutral and
+      objective classes are either excluded or explicitly mapped with a documented,
+      non-arbitrary rule (e.g. exclude neutral/objective rather than folding them
+      into positive or negative). Default posture without that rule: EVALUATE_SEPARATELY.
+  - pair: [egyptian_tweets_corpus_40k, arsas]
+    decision: EVALUATE_SEPARATELY
+    reasoning: >
+      ArSAS is not Egypt-specific and covers mixed Arabic varieties/topics; pooling
+      would blur the Egyptian-dialect signal that Egyptian Tweets 40K exists to
+      isolate. ArSAS remains useful only as a separate cross-dialect robustness test.
+  - pair: [astd, arsas]
+    decision: EVALUATE_SEPARATELY
+    reasoning: "Different label cardinality (4-class vs 4-class but non-identical categories) and different dialect scope; no evidence-based alignment established."
+  - pair: [labr, amazon_appliances]
+    decision: FORBIDDEN_TO_MERGE
+    reasoning: "Different languages (Arabic vs English) and different platforms/domains (Goodreads books vs Amazon appliances). No shared vocabulary or label semantics to pool on."
+  - pair: [mpold, any_sentiment_dataset]
+    decision: FORBIDDEN_TO_MERGE
+    reasoning: "Offensive-language labels are not sentiment labels; pooling would silently redefine the task."
+  - pair: [labr, astd]
+    decision: EVALUATE_SEPARATELY
+    reasoning: "Different domains (book reviews vs. social media) despite shared language; domain shift must be measured, not hidden by pooling."
+  - default_for_unlisted_pairs: EVALUATE_SEPARATELY

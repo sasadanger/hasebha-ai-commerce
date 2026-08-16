@@ -1,0 +1,139 @@
+schema_version: nlp-experiment-dataset-roles-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+note: >
+  Planned eligibility roles only. No field in this file authorizes training,
+  fine-tuning, or embedding generation. training_eligibility_future values
+  describe what a FUTURE, separately-authorized training gate may consider;
+  they do not themselves grant authorization.
+
+datasets:
+  - dataset_id: amazon_appliances
+    current_role: ACTIVE_TIER_A_CORE
+    task_eligibility: [REVIEW_RATING, SENTIMENT_VIA_RATING_MAPPING]
+    training_eligibility_future: ELIGIBLE_AS_DEVELOPMENT_SOURCE
+    validation_eligibility_future: ELIGIBLE
+    external_test_eligibility_future: NOT_APPLICABLE_SAME_DOMAIN_ONLY
+    domain: english_ecommerce_product_review
+    platform: amazon_marketplace
+    language: English
+    dialect: N/A
+    label_type: five_star_rating
+    commercial_readiness: UNKNOWN_RIGHTS_UNRESOLVED
+    known_limitations:
+      - "No native sentiment label; sentiment requires an explicit, documented rating-to-sentiment mapping (Step 27) before use as a sentiment target."
+      - "English/US-marketplace only; proves nothing about Egyptian language or market."
+
+  - dataset_id: egyptian_tweets_corpus_40k
+    current_role: ACTIVE_TIER_B_SUPPORTING
+    task_eligibility: [SENTIMENT]
+    training_eligibility_future: ELIGIBLE_AFTER_DUPLICATE_REAUDIT
+    validation_eligibility_future: ELIGIBLE_AFTER_DUPLICATE_REAUDIT
+    external_test_eligibility_future: ELIGIBLE_AS_EXTERNAL_TEST_FOR_ASTD_MODELS
+    domain: social_media_general
+    platform: twitter_x_derived
+    language: Egyptian Arabic
+    dialect: Egyptian
+    label_type: binary_sentiment_positive_negative
+    commercial_readiness: RESEARCH_READY_COMMERCIAL_PLATFORM_RIGHTS_REVIEW
+    known_limitations:
+      - "Reported 379 duplicate rows / 13 conflicting-label texts per remediation audit; independent review reproduced row count, label split, and missingness exactly but not the duplicate counts bit-for-bit (Finding 2). EGYPTIAN_TWEETS_DUPLICATE_REAUDIT_REQUIRED=YES before any split."
+      - "Twitter/X-sourced; CC0-1.0 applies to the compiler's release, not necessarily to underlying platform terms."
+      - "General social-media domain, not e-commerce/customer-service."
+
+  - dataset_id: astd
+    current_role: ACTIVE_TIER_B_SUPPORTING
+    task_eligibility: [SENTIMENT]
+    training_eligibility_future: ELIGIBLE
+    validation_eligibility_future: ELIGIBLE
+    external_test_eligibility_future: ELIGIBLE_AS_EXTERNAL_TEST_FOR_EGYPTIAN_TWEETS_MODELS
+    domain: social_media_general
+    platform: twitter_x
+    language: Egyptian Arabic
+    dialect: Egyptian (mixed with MSA)
+    label_type: four_class_sentiment_pos_neg_neutral_objective
+    commercial_readiness: NOT_READY
+    known_limitations:
+      - "4-class label scheme differs from Egyptian Tweets 40K's binary scheme -- MERGE_ALLOWED_WITH_RELABELLING_RULE only, never blind concatenation (Step 5)."
+      - "GPLv2 code license; underlying tweet-text platform rights unresolved."
+      - "Smaller corpus (9,694 rows) than Egyptian Tweets 40K."
+
+  - dataset_id: labr
+    current_role: ACTIVE_TIER_B_SUPPORTING
+    task_eligibility: [REVIEW_RATING, SENTIMENT_VIA_RATING_MAPPING]
+    training_eligibility_future: ELIGIBLE_AS_DOMAIN_ROBUSTNESS_SOURCE
+    validation_eligibility_future: ELIGIBLE
+    external_test_eligibility_future: ELIGIBLE_AS_ARABIC_GENERAL_REVIEW_EXTERNAL_TEST
+    domain: book_reviews_goodreads
+    platform: goodreads
+    language: Arabic (MSA-leaning, mixed dialects)
+    dialect: mixed, not Egyptian-specific
+    label_type: five_star_and_two_class_balanced_splits
+    commercial_readiness: NOT_READY
+    known_limitations:
+      - "Book-review domain, not commerce/e-commerce; must never be reported as Egyptian or commerce validation evidence."
+      - "GPLv2 code license; Goodreads text-rights unresolved."
+
+  - dataset_id: arsas
+    current_role: ACTIVE_TIER_C_RESEARCH_ONLY
+    task_eligibility: [SENTIMENT, SPEECH_ACT]
+    training_eligibility_future: ELIGIBLE_RESEARCH_ONLY_AFTER_DUPLICATE_REAUDIT
+    validation_eligibility_future: ELIGIBLE_RESEARCH_ONLY
+    external_test_eligibility_future: ELIGIBLE_AS_MIXED_DIALECT_ROBUSTNESS_TEST
+    domain: social_media_general_mixed_topics
+    platform: twitter_x
+    language: mixed Arabic varieties (not Egypt-specific)
+    dialect: mixed
+    label_type: four_class_sentiment_and_six_class_speech_act_two_separate_columns
+    commercial_readiness: NOT_READY_NO_LICENSE_STATED
+    known_limitations:
+      - "No dataset license stated at all; NOT_READY for anything beyond internal research use pending legal review."
+      - "Sentiment and speech-act are two independent label columns and MUST remain two separate tasks (D1, D2) -- never combined into one target."
+      - "31 conflicting sentiment-label duplicate texts reported; independent review reproduced 99 exact-duplicate rows exactly but not the 31 conflicting count. ARSAS_DUPLICATE_REAUDIT_REQUIRED=YES before any split."
+
+  - dataset_id: mpold
+    current_role: ACTIVE_TIER_C_RESEARCH_ONLY
+    task_eligibility: [OFFENSIVE_LANGUAGE_SAFETY]
+    training_eligibility_future: ELIGIBLE_RESEARCH_ONLY
+    validation_eligibility_future: ELIGIBLE_RESEARCH_ONLY
+    external_test_eligibility_future: ELIGIBLE_AS_SAFETY_ROBUSTNESS_TEST
+    domain: multiplatform_social_comments
+    platform: [twitter, facebook, youtube]
+    language: Arabic / mixed script
+    dialect: mixed, not Egypt-specific
+    label_type: binary_offensive_non_offensive
+    commercial_readiness: REVIEW_REQUIRED
+    known_limitations:
+      - "MUST NOT be mapped to or reported as sentiment. Offensive-language annotation is a distinct concept from sentiment polarity."
+      - "Apache 2.0 covers the repository/code; underlying multi-platform comment text-rights scope requires separate review."
+
+  - dataset_id: eesa_named_dataset
+    current_role: TARGET_TIER_A_PENDING_ACQUISITION
+    task_eligibility: [SENTIMENT, CODE_SWITCHING_ROBUSTNESS]
+    training_eligibility_future: PENDING_DATA_ACQUISITION
+    validation_eligibility_future: PENDING_DATA_ACQUISITION
+    external_test_eligibility_future: PENDING_DATA_ACQUISITION
+    domain: youtube_comments
+    platform: youtube
+    language: Egyptian Arabic-English code-switch
+    dialect: Egyptian
+    label_type: unknown_pending_acquisition
+    commercial_readiness: NOT_READY
+    known_limitations:
+      - "Files not obtained; paper-verified only (Sherif & Sabty, SPECOM 2024). Cannot be used in any experiment until acquired and independently re-audited."
+
+  - dataset_id: adab_politeness
+    current_role: ACCESS_PENDING
+    task_eligibility: [POLITENESS]
+    training_eligibility_future: PENDING_GATED_ACCESS_RESOLUTION
+    validation_eligibility_future: PENDING_GATED_ACCESS_RESOLUTION
+    external_test_eligibility_future: PENDING_GATED_ACCESS_RESOLUTION
+    domain: [social_media, ecommerce, customer_service]
+    platform: four_platforms_per_paper
+    language: MSA and multiple dialects including Egyptian
+    dialect: multi-dialect (Gulf, Egyptian, Levantine, Maghrebi)
+    label_type: three_class_polite_impolite_neutral
+    commercial_readiness: DEFERRED_RIGHTS_REVIEW
+    known_limitations:
+      - "Gated dataset, not obtained; the only located mirror's official-channel status is not independently confirmed (independent review finding). Do not acquire from an unconfirmed mirror."
+      - "Politeness is a distinct concept from sentiment and from complaint intent -- never collapse into either."

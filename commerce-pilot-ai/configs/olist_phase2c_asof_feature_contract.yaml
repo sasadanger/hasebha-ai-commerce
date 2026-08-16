@@ -1,0 +1,344 @@
+schema_version: olist-phase2c-asof-feature-contract-v1
+status: PLANNING_AND_AUDIT_OUTPUT
+created_utc: '2026-08-09T00:00:00+00:00'
+supersedes_note: This contract does NOT rewrite reports/generated/olist/phase2b/correction_v1/complete_fifteen_feature_audit.json
+  or docs/olist_asof_feature_contract.md. It extends them with Phase 2C evidence-strength detail. Both
+  prior documents remain unmodified and their UNVERIFIED_ASOF classification is confirmed unchanged, not
+  superseded, by this audit.
+decision_timestamp: order_approved_at
+target: late_delivery = order_delivered_customer_date > order_estimated_delivery_date
+features:
+- feature_name: payment_record_count
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_payments_dataset
+  source_timestamp: none (no timestamp column in source table)
+  aggregation_rule: count(*) GROUP BY order_id
+  latest_safe_cutoff: unknown (no source timestamp exists)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: 'olist_order_payments_dataset schema is exactly [order_id, payment_sequential, payment_type,
+    payment_installments, payment_value] -- independently confirmed by direct parquet schema inspection
+    this session. No event timestamp of any kind exists in this table. The build_development() SQL (expanded_feature_builder.py)
+    aggregates ALL payment rows for the order_id with no temporal predicate, because none is possible.
+    order_approved_at is documented as ''confirmed payment approval'', which plausibly implies all payment_sequential
+    rows for an order are registered together at authorization even when payment_installments>1 (a typical
+    Brazilian installment-card pattern where the total is authorized upfront and charged over future months).
+    This is a plausible domain inference, not a proven fact: the repository contains no evidence ruling
+    out payment records being appended, corrected, or only fully known after order_approved_at.'
+- feature_name: max_payment_installments
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_payments_dataset
+  source_timestamp: none (no timestamp column in source table)
+  aggregation_rule: max(payment_installments) GROUP BY order_id
+  latest_safe_cutoff: unknown (no source timestamp exists)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: 'olist_order_payments_dataset schema is exactly [order_id, payment_sequential, payment_type,
+    payment_installments, payment_value] -- independently confirmed by direct parquet schema inspection
+    this session. No event timestamp of any kind exists in this table. The build_development() SQL (expanded_feature_builder.py)
+    aggregates ALL payment rows for the order_id with no temporal predicate, because none is possible.
+    order_approved_at is documented as ''confirmed payment approval'', which plausibly implies all payment_sequential
+    rows for an order are registered together at authorization even when payment_installments>1 (a typical
+    Brazilian installment-card pattern where the total is authorized upfront and charged over future months).
+    This is a plausible domain inference, not a proven fact: the repository contains no evidence ruling
+    out payment records being appended, corrected, or only fully known after order_approved_at.'
+- feature_name: total_payment_value
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_payments_dataset
+  source_timestamp: none (no timestamp column in source table)
+  aggregation_rule: sum(payment_value) GROUP BY order_id
+  latest_safe_cutoff: unknown (no source timestamp exists)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: 'olist_order_payments_dataset schema is exactly [order_id, payment_sequential, payment_type,
+    payment_installments, payment_value] -- independently confirmed by direct parquet schema inspection
+    this session. No event timestamp of any kind exists in this table. The build_development() SQL (expanded_feature_builder.py)
+    aggregates ALL payment rows for the order_id with no temporal predicate, because none is possible.
+    order_approved_at is documented as ''confirmed payment approval'', which plausibly implies all payment_sequential
+    rows for an order are registered together at authorization even when payment_installments>1 (a typical
+    Brazilian installment-card pattern where the total is authorized upfront and charged over future months).
+    This is a plausible domain inference, not a proven fact: the repository contains no evidence ruling
+    out payment records being appended, corrected, or only fully known after order_approved_at.'
+- feature_name: item_count
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: count(*) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: unique_product_count
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: count(distinct product_id) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: unique_seller_count
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: count(distinct seller_id) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: total_item_price
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: sum(price) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: total_freight_value
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: sum(freight_value) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: mean_freight_value
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: avg(freight_value) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: max_freight_value
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_order_items_dataset
+  source_timestamp: implicitly order_purchase_timestamp (no direct per-item timestamp)
+  aggregation_rule: max(freight_value) GROUP BY order_id
+  latest_safe_cutoff: order_approved_at (unverified, inferred only)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: STRONG_INFERRED
+  evidence_strength: STRONG_INFERRED
+  notes: 'olist_order_items_dataset rows are tied 1:1 to the specific order being scored (grouped by order_id
+    before use, per docs/olist_join_aggregation_contract.md), not aggregated across other orders, so this
+    is not a cross-order historical-aggregation leakage pattern (Step 7 audit: not applicable to this
+    feature). build_development() enforces order_approved_at>=order_purchase_timestamp for every eligible
+    row, and items are the composition of what was purchased, so item-level facts (which product, which
+    seller, price, freight) plausibly existed no later than order_purchase_timestamp, which by construction
+    precedes order_approved_at. However, no per-item creation or modification timestamp exists in the
+    source schema to directly prove items/prices were immutable between purchase and approval (e.g. that
+    no item could be added, removed, or re-priced during that interval).'
+- feature_name: product_category_diversity
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_products_dataset (joined via items)
+  source_timestamp: none (no timestamp/version column in source table)
+  aggregation_rule: count(distinct product_category_name) GROUP BY order_id, via items JOIN products USING(product_id)
+  latest_safe_cutoff: unknown (static catalog export, no versioning)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: olist_products_dataset schema is exactly [product_id, product_category_name, product_name_lenght,
+    product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm,
+    product_width_cm] -- independently confirmed by direct parquet schema inspection this session. There
+    is no timestamp or version field of any kind. This is a single static current-day catalog export joined
+    by product_id with no snapshot/versioning mechanism (docs/olist_asof_feature_contract.md already flags
+    this CONDITIONALLY_ALLOWED pending 'approval-time catalog snapshot' verification; the code confirms
+    no such snapshot mechanism exists). A product's recorded category or physical dimensions could have
+    been corrected by a seller/catalog admin after any given historical order was placed, and the feature
+    would silently reflect the corrected/current value with no way to detect this from the data as exported.
+- feature_name: mean_product_weight_g
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_products_dataset (joined via items)
+  source_timestamp: none (no timestamp/version column in source table)
+  aggregation_rule: avg(product_weight_g) GROUP BY order_id, via items JOIN products USING(product_id)
+  latest_safe_cutoff: unknown (static catalog export, no versioning)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: olist_products_dataset schema is exactly [product_id, product_category_name, product_name_lenght,
+    product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm,
+    product_width_cm] -- independently confirmed by direct parquet schema inspection this session. There
+    is no timestamp or version field of any kind. This is a single static current-day catalog export joined
+    by product_id with no snapshot/versioning mechanism (docs/olist_asof_feature_contract.md already flags
+    this CONDITIONALLY_ALLOWED pending 'approval-time catalog snapshot' verification; the code confirms
+    no such snapshot mechanism exists). A product's recorded category or physical dimensions could have
+    been corrected by a seller/catalog admin after any given historical order was placed, and the feature
+    would silently reflect the corrected/current value with no way to detect this from the data as exported.
+- feature_name: mean_product_length_cm
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_products_dataset (joined via items)
+  source_timestamp: none (no timestamp/version column in source table)
+  aggregation_rule: avg(product_length_cm) GROUP BY order_id, via items JOIN products USING(product_id)
+  latest_safe_cutoff: unknown (static catalog export, no versioning)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: olist_products_dataset schema is exactly [product_id, product_category_name, product_name_lenght,
+    product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm,
+    product_width_cm] -- independently confirmed by direct parquet schema inspection this session. There
+    is no timestamp or version field of any kind. This is a single static current-day catalog export joined
+    by product_id with no snapshot/versioning mechanism (docs/olist_asof_feature_contract.md already flags
+    this CONDITIONALLY_ALLOWED pending 'approval-time catalog snapshot' verification; the code confirms
+    no such snapshot mechanism exists). A product's recorded category or physical dimensions could have
+    been corrected by a seller/catalog admin after any given historical order was placed, and the feature
+    would silently reflect the corrected/current value with no way to detect this from the data as exported.
+- feature_name: mean_product_height_cm
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_products_dataset (joined via items)
+  source_timestamp: none (no timestamp/version column in source table)
+  aggregation_rule: avg(product_height_cm) GROUP BY order_id, via items JOIN products USING(product_id)
+  latest_safe_cutoff: unknown (static catalog export, no versioning)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: olist_products_dataset schema is exactly [product_id, product_category_name, product_name_lenght,
+    product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm,
+    product_width_cm] -- independently confirmed by direct parquet schema inspection this session. There
+    is no timestamp or version field of any kind. This is a single static current-day catalog export joined
+    by product_id with no snapshot/versioning mechanism (docs/olist_asof_feature_contract.md already flags
+    this CONDITIONALLY_ALLOWED pending 'approval-time catalog snapshot' verification; the code confirms
+    no such snapshot mechanism exists). A product's recorded category or physical dimensions could have
+    been corrected by a seller/catalog admin after any given historical order was placed, and the feature
+    would silently reflect the corrected/current value with no way to detect this from the data as exported.
+- feature_name: mean_product_width_cm
+  classification: UNVERIFIED_ASOF
+  primary_asof: false
+  decision_timestamp: order_approved_at
+  source: olist_products_dataset (joined via items)
+  source_timestamp: none (no timestamp/version column in source table)
+  aggregation_rule: avg(product_width_cm) GROUP BY order_id, via items JOIN products USING(product_id)
+  latest_safe_cutoff: unknown (static catalog export, no versioning)
+  leakage_rule: none present in source code (src/modeling/olist/expanded_feature_builder.py); no temporal
+    predicate on payments or items/products joins
+  availability_evidence: WEAK_INFERRED
+  evidence_strength: WEAK_INFERRED
+  notes: olist_products_dataset schema is exactly [product_id, product_category_name, product_name_lenght,
+    product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm,
+    product_width_cm] -- independently confirmed by direct parquet schema inspection this session. There
+    is no timestamp or version field of any kind. This is a single static current-day catalog export joined
+    by product_id with no snapshot/versioning mechanism (docs/olist_asof_feature_contract.md already flags
+    this CONDITIONALLY_ALLOWED pending 'approval-time catalog snapshot' verification; the code confirms
+    no such snapshot mechanism exists). A product's recorded category or physical dimensions could have
+    been corrected by a seller/catalog admin after any given historical order was placed, and the feature
+    would silently reflect the corrected/current value with no way to detect this from the data as exported.
+classification_counts:
+  PROVEN_PRIMARY_ASOF: 0
+  UNVERIFIED_ASOF: 15
+  RETROSPECTIVE_ONLY: 0
+  FORBIDDEN_LEAKAGE: 0
+  IDENTIFIER_ONLY: 0
+  POST_OUTCOME: 0
+  UNKNOWN: 0
+overall_conclusion: '0 of 15 Expanded features meet the DIRECT_PROVEN evidence standard required for PROVEN_PRIMARY_ASOF
+  (Step 6 of the governing session prompt: all 12 sub-questions must be answerable; for every one of the
+  15 features, at least questions 3 (timestamp <= order_approved_at), 8 (backfill), and 9 (revision process)
+  cannot be answered from repository or source-schema evidence). All 15 remain UNVERIFIED_ASOF, unchanged
+  from the Phase 2B closure state. Item/freight-derived features (7 of 15) carry STRONG_INFERRED evidence
+  given the enforced purchase<=approval temporal ordering; payment-derived features (3 of 15) and product-catalog-derived
+  features (5 of 15) carry only WEAK_INFERRED evidence because their source tables contain no timestamp
+  or versioning information whatsoever. No feature is reclassified FORBIDDEN_LEAKAGE, POST_OUTCOME, or
+  CONTRADICTORY; the audit finds an evidence gap, not proof of leakage. Feature-contract hardening therefore
+  adds evidence-strength granularity and a documented reason per feature, without promoting any feature
+  and without narrowing the existing UNVERIFIED_ASOF classification inherited from Phase 2B.'

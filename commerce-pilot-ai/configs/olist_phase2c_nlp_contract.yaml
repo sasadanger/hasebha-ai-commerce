@@ -1,0 +1,91 @@
+schema_version: olist-phase2c-nlp-contract-v1
+status: PLANNING_ONLY_EXECUTION_DEFERRED
+created_utc: "2026-08-09T00:00:00+00:00"
+source_documents:
+  - docs/amazon_reviews_voice_of_customer_readiness.md
+  - docs/modeling_readiness_gate.md
+  - docs/olist_asof_feature_contract.md
+  - docs/project_charter.md
+  - docs/research_questions.md
+
+decision: >
+  NLP is an explicit experimental track with a documented scientific contract
+  (this file), NOT a silent "future enhancement." Execution is explicitly
+  DEFERRED to the separate voice-of-customer capability track, for the
+  documented reasons below. This satisfies the requirement that NLP must
+  never be left undecided.
+
+why_execution_is_deferred_here:
+  - reason: "Designated NLP dataset (Amazon Reviews 2023, Appliances) is NO-GO per docs/modeling_readiness_gate.md: license Not verified, no target/sentiment/topic/language label definition, no approved split strategy."
+  - reason: "Olist's own review table is structurally FORBIDDEN as an input feature for the late_delivery target (docs/olist_asof_feature_contract.md): reviews are created after delivery, making them post-outcome leakage for this decision point by construction, independent of any future readiness work."
+  - reason: "No Arabic or Egyptian-market text data exists anywhere in this repository."
+  - reason: "Project charter non-goals explicitly forbid merging datasets or inferring cross-dataset identity; Olist orders cannot be paired with Amazon Appliances reviews to manufacture a combined signal."
+
+1_source_text_field:
+  candidate_source: "Amazon Reviews 2023, Appliances category only (per charter scope) — review title/text"
+  olist_source_excluded: "olist_order_reviews_dataset review_comment_title / review_comment_message — FORBIDDEN for the delivery-risk target (post-outcome)"
+  status: not selected pending Amazon Appliances Phase 2 readiness resolution
+
+2_text_creation_timestamp:
+  field: epoch-millisecond review timestamp (per docs/amazon_reviews_voice_of_customer_readiness.md)
+  status: present in source; AS-OF relationship to any future decision point not yet defined because no decision point exists for a voice-of-customer capability yet
+
+3_decision_timestamp:
+  status: NOT_YET_DEFINED
+  note: >
+    The voice-of-customer capability (per docs/research_questions.md) answers
+    "can review sentiment/issue themes be identified for human triage",
+    which is a retrospective analysis task, not necessarily a forward
+    prediction task with a pre-outcome decision timestamp. This distinction
+    must be resolved before any AS-OF eligibility claim is possible.
+
+4_asof_eligibility: UNDETERMINED_PENDING_3
+
+5_languages:
+  known: English (Amazon Appliances)
+  required_for_egyptian_relevance: Arabic, Egyptian Arabic, code-switched Arabic/English
+  gap: "No Arabic-language review data currently exists in the repository. English Amazon reviews are not a substitute — see docs/amazon_reviews_voice_of_customer_readiness.md."
+
+6_minimum_text_coverage: TO_BE_DEFINED_AFTER_LANGUAGE_ID_POLICY
+7_missing_text_handling: TO_BE_DEFINED
+8_preprocessing: TO_BE_DEFINED
+9_model_representation_families_allowed: TO_BE_DEFINED
+10_frozen_vs_finetuned_approach: TO_BE_DEFINED
+11_leakage_restrictions:
+  - "No text created after the relevant decision timestamp may be used as a feature for that decision."
+  - "No embedding/vectorizer/topic model may be fit on validation or test text."
+  - "No target-derived text statistic (e.g. review score used to build the label) may leak into the same-record feature set."
+12_embedding_generation_rules: TO_BE_DEFINED
+13_training_set_only_fitting_rules: >
+  Any text representation (TF-IDF, embeddings, topic models) must be fit
+  exclusively on the training-fold portion of a temporally valid split,
+  never on validation/test text, mirroring the numeric feature discipline
+  already established in docs/olist_asof_feature_contract.md.
+14_temporal_split_compatibility: TO_BE_DEFINED
+15_comparison_baselines: "Structured-only model (Model A, see olist_phase2c_evaluation.yaml)"
+16_incremental_value_test: "Same paired-bootstrap methodology as Phase 2B, extended per the NLP incremental-signal gate below"
+17_calibration_requirements: TO_BE_DEFINED
+18_robustness_tests: TO_BE_DEFINED
+19_egyptian_arabic_evaluation: "Not possible until Egyptian/Arabic text data exists; see docs/phase2c_egyptian_market_evidence_requirements.md"
+20_code_switching_evaluation: "Not possible until representative code-switched data exists"
+21_minimum_documentation_artifacts:
+  - "NLP data card (per governance artifact list in docs/olist_phase2c_protocol.md)"
+  - "Language/dialect coverage report"
+  - "Leakage audit specific to text timing"
+  - "AS-OF eligibility determination for the text source"
+
+nlp_incremental_signal_gate:
+  rule: >
+    A future NLP feature or NLP-augmented model MUST NOT receive a label
+    equivalent to SUPPORTED_INCREMENTAL_SIGNAL unless BOTH hold: (A) the
+    statistical/evaluation criteria used in Phase 2B (paired-bootstrap CI
+    lower bound > 0 and majority folds improved) AND (B) proven AS-OF
+    eligibility of the text source at the decision timestamp. Development
+    improvement without proven AS-OF eligibility must be labeled
+    INCONCLUSIVE_INCREMENTAL_SIGNAL, exactly as Phase 2B's corrected
+    evidence labels already establish for structured Expanded features.
+  gate_function_reference: >
+    src/modeling/olist/temporal_validation.py::corrected_evidence_label(...)
+    is the existing AS-OF-aware pattern to reuse/extend for any future NLP
+    gate, not a new ad hoc rule.
+  applies_to: any future NLP feature, embedding, or NLP-augmented model, regardless of dataset.

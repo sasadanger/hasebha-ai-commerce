@@ -1,0 +1,74 @@
+schema_version: nlp-execution-contract-v4
+authorization_scope: INFRASTRUCTURE_ONLY_NO_TRAINING
+implementation:
+  amazon_adapter: src/nlp/amazon_adapter.py
+  split_materializer: src/nlp/splitting.py
+  configuration_resolver: src/nlp/configuration.py
+  leakage_and_release_controls: src/nlp/execution_control.py
+
+execution_order:
+  rule: BATCH_1_CANDIDATE list order, then learned_configurations list order
+  candidate_order: [A, B2, C, E]
+  parallelism_effect: "Parallel scheduling may not alter execution_order, compound_id, fingerprint, stored result order, or winner selection."
+
+configuration_resolution:
+  precedence: central_execution_defaults_then_declared_candidate_override
+  unknown_keys: FAIL
+  unsupported_model_family: FAIL
+  duplicate_compound_id: FAIL
+  serialization: canonical JSON with sorted keys and compact separators
+  fingerprint: SHA-256 of resolved configuration identity and parameters
+  cartesian_expansion: FORBIDDEN
+
+optional_stages:
+  feature_selection: DISABLED
+  calibration: DISABLED
+  probability_calibration: DISABLED
+  threshold_optimization: DISABLED
+  resampling: DISABLED
+  dimensionality_reduction: DISABLED
+  external_embeddings: DISABLED
+  transformer_embeddings: DISABLED
+  additional_hyperparameter_search: DISABLED
+  class_weighting: ENABLED_BALANCED_FOR_LOGREG_AND_LINEAR_SVM_ONLY
+
+development_execution:
+  preprocessing_fit_partition: train_only
+  tfidf_fit_partition: train_only
+  model_fit_partition: train_only
+  configuration_selection_partition: development_validation_only
+  internal_test_visibility_before_release: DENIED
+
+winner_selection:
+  scope: within_one_experiment_only
+  primary_metric: macro_f1
+  ordered_tie_breakers: [balanced_accuracy_desc, accuracy_desc, execution_order_asc]
+  cross_experiment_comparison: FORBIDDEN
+
+internal_test_release:
+  state_before_release: DENIED
+  authorization_required: true
+  maximum_releases_per_run: 1
+  access_api: "PartitionStore.evaluate_internal_test_once passes rows to exactly one evaluator callback, clears them, and never returns rows"
+  ledger_schema: nlp-internal-test-release-v1
+  required_fields: [run_id, winning_compound_id, winning_configuration_fingerprint, authorized, reason, metric_contract, split_policy, release_state, released_utc]
+
+run_contract:
+  run_id_format: "nlp-batch1-<UTC_YYYYMMDDTHHMMSSZ>-<8_hex_config_set_hash>"
+  output_directory: artifacts/experiments/nlp/phase2c/batch1/<experiment_id>/<run_id>/
+  overwrite: FORBIDDEN
+  required_fingerprints: [resolved_config_sha256, split_policy_sha256, normalization_contract_sha256, dataset_acquisition_sha256]
+  files:
+    resolved_config: resolved_config.json
+    dataset_hashes: dataset_hashes.json
+    prepared_split_hashes: prepared_split_hashes.json
+    environment: environment.json
+    development_metrics: development_metrics.json
+    candidate_results: candidate_results.json
+    winner: winner.json
+    internal_test_release: internal_test_release.json
+    final_evaluation: final_evaluation.json
+    run_manifest: run_manifest.json
+  candidate_result_required_fields: [experiment_id, compound_id, configuration_fingerprint, execution_order, macro_f1, balanced_accuracy, accuracy, split_hash]
+  winner_required_fields: [experiment_id, compound_id, configuration_fingerprint, selection_rule, selected_utc]
+  final_evaluation_required_fields: [run_id, experiment_id, compound_id, release_ledger_sha256, internal_test_split_hash, metrics, evaluated_utc]

@@ -1,0 +1,71 @@
+reassessment:
+  phase: "1D"
+  reassessment_date: "2026-08-03"
+  previous_technical_verdict: "NO-GO"
+  technical_offline_verdict: "CONDITIONAL GO"
+  legal_licensing_verdict: "NO-GO"
+  production_verdict: "NO-GO"
+  egyptian_market_external_validity_verdict: "NO-GO"
+
+prediction:
+  point: "confirmed_payment_approval"
+  timestamp_column: "order_approved_at"
+  scientific_claim: "Retrospective offline classification of whether a delivered order exceeded the estimated delivery date stored in the Olist dataset."
+
+target:
+  name: "late_delivery"
+  definition: "order_delivered_customer_date > order_estimated_delivery_date"
+  semantics_status: "VALID_RETROSPECTIVE_PROMISE_BREACH_TARGET_WITH_UNVERIFIED_ASOF_SEMANTICS"
+  equality_is_late: false
+  generation_after_eligibility: true
+
+policy_versions:
+  eligibility: "olist-eligibility-v1"
+  anomaly: "olist-timestamp-anomaly-v1"
+  feature_contract: "olist-feature-contract-v1"
+
+temporal_split:
+  train: {start: "2016-09-01", end_exclusive: "2018-01-01"}
+  validation: {start: "2018-01-01", end_exclusive: "2018-05-01"}
+  test: {start: "2018-05-01", end_exclusive: "2018-09-01"}
+
+evaluation:
+  primary_metric: "pr_auc"
+  secondary_metrics: ["roc_auc", "recall", "precision", "f1", "confusion_matrix", "brier_score", "calibration_curve", "predicted_risk_distribution", "positive_class_prevalence"]
+  threshold_restrictions:
+    - "No production-optimal threshold without verified costs or an approved operating constraint."
+    - "Threshold exploration uses validation only."
+    - "Hypothetical cost scenarios must be labeled assumptions."
+    - "The final test set is never used for threshold selection."
+
+preprocessing_fit_rules:
+  - "Fit every learned transformation on training only."
+  - "Map unknown validation/test categories without refitting."
+  - "No target encoding unless leakage-safe out-of-fold within training."
+  - "No resampling before the temporal split."
+  - "No final-test access for selection or tuning."
+
+experiment_variants:
+  primary: "strict_offline_core"
+  sensitivity: "expanded_snapshot_assumptions"
+  mixing_results_prohibited: true
+
+open_assumptions:
+  - "The stored estimated delivery date may not be the immutable estimate visible at approval."
+  - "Final-export commercial, catalog, customer, and seller fields may not represent approval-time snapshots."
+  - "Business costs and minimum recall are not verified."
+  - "Dataset version is not verified."
+
+readiness_gate_criteria:
+  reproducible_target_and_cohort: true
+  frozen_chronological_split: true
+  nontrivial_strict_core: true
+  forbidden_features_programmatically_blocked: true
+  leakage_safe_preprocessing_protocol: true
+  legal_clearance: false
+  production_external_validity: false
+
+output:
+  json: "reports/generated/olist/phase1d_readiness_reassessment.json"
+  markdown: "reports/generated/olist/phase1d_readiness_reassessment.md"
+

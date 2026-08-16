@@ -1,0 +1,16 @@
+# Risk Register
+
+The register applies throughout research, implementation, and operation. Risk status and ownership will be assigned when project governance is established.
+
+| Risk area | Risk | Mitigation | Validation approach |
+|---|---|---|---|
+| Data quality | Missing, inconsistent, duplicated, stale, or misunderstood records could distort findings. | Verify source documentation; profile data before use; document assumptions; implement capability-specific quality checks; quarantine invalid inputs. | Review profiling reports and quality-test results; trace sampled outputs back to source records; reassess checks when versions change. |
+| Data leakage | Training or feature construction could use information unavailable at the intended decision time, overstating performance. | Define prediction and decision timing; use time-aware or otherwise appropriate splits; isolate evaluation data; review features and transformations. | Conduct split and feature audits; compare against simple baselines; reproduce evaluation from a clean environment. |
+| Bias | Data coverage or analytical choices could produce systematically weaker or harmful outputs for relevant groups or contexts. | Document coverage limits; select meaningful cohorts with stakeholder input; assess errors and coverage by validated segments; require human review. | Perform subgroup and slice evaluation where lawful and supported; review failure cases; record known limitations on Decision Action Cards. |
+| Privacy | Source data, free text, outputs, or logs could expose personal or sensitive information. | Verify permitted use; minimize collected and retained data; restrict access; redact or aggregate where appropriate; avoid unnecessary identifiers. | Complete privacy and access reviews; test redaction and retention controls; inspect logs and representative outputs for disclosure risks. |
+| Reproducibility | Results could depend on undocumented data versions, environments, randomness, or manual steps. | Record source versions and configuration; version code; control randomness where relevant; automate repeatable steps; preserve evaluation metadata. | Re-run pipelines and evaluations in a clean approved environment; compare artifacts and documented results; audit lineage. |
+| Deployment | Performance, reliability, security, or data drift could differ from research conditions. | Separate research from production approval; define service contracts, monitoring, rollback, and failure behavior; use staged releases. | Run contract, integration, load, security, and failure-mode tests appropriate to the chosen deployment; monitor approved indicators after release. |
+| Business adoption | Outputs may be unclear, unactionable, poorly timed, or untrusted by intended users. | Co-design decisions and card content with users; identify action owners; expose evidence and limitations; integrate feedback and escalation paths. | Conduct workflow reviews and usability evaluation; track whether users understand and appropriately act on cards; review rejected or ignored recommendations. |
+
+Risk validation must be repeated when the dataset, capability, decision context, model, contract, or deployment environment materially changes.
+

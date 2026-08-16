@@ -1,0 +1,58 @@
+schema_version: nlp-experiment-manifest-v2
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: PHASE2C_NLP_TRAINING_AUTHORIZATION_REMEDIATION_V3
+status: PENDING_INDEPENDENT_REVIEW
+training_authorized: false
+active_split_policy: configs/nlp_split_policy.yaml
+active_split_policy_version: nlp-split-policy-v2
+normalization_contract: configs/nlp_text_normalization_contract_v2.yaml
+duplicate_contract: configs/nlp_duplicate_control_contract_v2.yaml
+metric_contract: configs/nlp_metric_contract_v2.yaml
+label_ontology: configs/nlp_label_ontology_v2.yaml
+execution_contract: configs/nlp_execution_contract_v4.yaml
+note: "This active manifest contains only the four approved classical-ML Batch 1 candidates. Deferred and blocked experiments remain governed by the authorization ledger, not this execution manifest."
+
+experiments:
+  - experiment_id: EXPERIMENT_A_english_ecommerce_review_baseline
+    batch_id: A
+    status: READY_FOR_REVIEW
+    task: FIVE_CLASS_RATING_CLASSIFICATION
+    dataset: amazon_appliances
+    physical_schema: {rating: float, title: text, text: text}
+    physical_to_canonical_adapter: src/nlp/amazon_adapter.py#adapt_amazon_record
+    physical_to_canonical_mapping: {rating: overall, title: review_title, text: review_text}
+    input_fields: [review_text, review_title]
+    label_fields: [overall]
+    split_contract: configs/nlp_split_policy.yaml#EXPERIMENT_A_english_ecommerce_review_baseline
+    approved_model_families: [TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM]
+    training_authorized: false
+  - experiment_id: EXPERIMENT_B2_astd_only
+    batch_id: B2
+    status: READY_FOR_REVIEW
+    task: FOUR_CLASS_SENTIMENT_CLASSIFICATION
+    dataset: astd
+    input_fields: [text]
+    label_fields: [label]
+    split_contract: configs/nlp_split_policy.yaml#EXPERIMENT_B2_astd_only
+    approved_model_families: [TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM, TFIDF_MULTINOMIAL_NAIVE_BAYES]
+    training_authorized: false
+  - experiment_id: EXPERIMENT_C_arabic_review_domain_robustness
+    batch_id: C
+    status: READY_FOR_REVIEW
+    task: FIVE_CLASS_RATING_CLASSIFICATION
+    dataset: labr
+    input_fields: [review_text]
+    label_fields: [rating]
+    split_contract: configs/nlp_split_policy.yaml#EXPERIMENT_C_labr_domain_robustness
+    approved_model_families: [TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM]
+    training_authorized: false
+  - experiment_id: EXPERIMENT_E_multiplatform_safety_robustness
+    batch_id: E
+    status: READY_FOR_REVIEW
+    task: BINARY_OFFENSIVE_LANGUAGE_CLASSIFICATION
+    dataset: mpold
+    input_fields: [Comment]
+    label_fields: [Majority_Label]
+    split_contract: configs/nlp_split_policy.yaml#EXPERIMENT_E_mpold_safety
+    approved_model_families: [TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM, TFIDF_MULTINOMIAL_NAIVE_BAYES]
+    training_authorized: false

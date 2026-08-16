@@ -1,0 +1,34 @@
+schema_version: nlp-label-ontology-v2
+supersedes_for_future_authorization: configs/nlp_label_ontology.yaml
+authorization_scope: NLP_TRAINING_AUTHORIZATION_REMEDIATION_ONLY
+
+source_native_concepts:
+  AMAZON_APPLIANCES_RATING:
+    dataset_id: amazon_appliances
+    task_type: FIVE_CLASS_RATING_CLASSIFICATION
+    source_field: overall
+    labels: [1, 2, 3, 4, 5]
+    derived_sentiment_mapping: NONE
+  LABR_RATING:
+    dataset_id: labr
+    task_type: FIVE_CLASS_RATING_CLASSIFICATION
+    source_field: rating
+    labels: [1, 2, 3, 4, 5]
+    derived_sentiment_mapping: NONE
+  ASTD_SENTIMENT:
+    dataset_id: astd
+    task_type: FOUR_CLASS_SENTIMENT_CLASSIFICATION
+    source_field: label
+    labels: [POS, NEG, NEUTRAL, OBJ]
+  MPOLD_SAFETY:
+    dataset_id: mpold
+    task_type: BINARY_OFFENSIVE_LANGUAGE_CLASSIFICATION
+    source_field: Majority_Label
+    labels: [Non-Offensive, Offensive]
+
+separation_rules:
+  - "Rating is not sentiment unless a separately versioned derived mapping is explicitly authorized; none is authorized in Batch 1 V2."
+  - "ASTD sentiment is not rating."
+  - "MPOLD offensive-language safety is not sentiment or rating."
+  - "Amazon and LABR labels have equal numeric values but remain dataset-native concepts; no pooled target or direct score comparison is authorized."
+

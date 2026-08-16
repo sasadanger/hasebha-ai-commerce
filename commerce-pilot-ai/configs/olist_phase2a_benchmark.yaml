@@ -1,0 +1,59 @@
+experiment:
+  name: "Olist strict-core baselines, CatBoost, and LightGBM benchmark"
+  id: "olist-phase2a-strict-core-v1"
+  random_seed: 42
+contracts:
+  feature: "olist-feature-contract-v1"
+  eligibility: "olist-eligibility-v1"
+  anomaly: "olist-timestamp-anomaly-v1"
+  target_semantics_status: "VALID_RETROSPECTIVE_PROMISE_BREACH_TARGET_WITH_UNVERIFIED_ASOF_SEMANTICS"
+prediction_point: {name: "confirmed_payment_approval", timestamp: "order_approved_at"}
+target: {formula: "order_delivered_customer_date > order_estimated_delivery_date", positive_class: "late_delivery = 1"}
+dataset:
+  orders_path: "data/processed/olist/olist_orders_dataset.parquet"
+  orders_sha256: "d11d01741c0ff538a655ee62e93e155202b88999dd0cfdc9df0c21501d7dcee2"
+splits:
+  train: {start: "2016-09-01", end_exclusive: "2018-01-01", rows: 43516, positive: 2875, negative: 40641}
+  validation: {start: "2018-01-01", end_exclusive: "2018-05-01", rows: 26822, positive: 3351, negative: 23471}
+  test: {start: "2018-05-01", end_exclusive: "2018-09-01", rows: 24744, positive: 1566, negative: 23178}
+features: [purchase_year, purchase_month, purchase_day_of_week, purchase_hour, approval_year, approval_month, approval_day_of_week, approval_hour, purchase_to_approval_seconds]
+preprocessing:
+  dummy: "none"
+  logistic_regression: "StandardScaler fitted on current training partition"
+  catboost: "validated numeric strict-core values"
+  lightgbm: "validated numeric strict-core values"
+models:
+  dummy: [{strategy: prior}]
+  logistic_regression:
+    - {C: 0.1, solver: lbfgs, penalty: l2, max_iter: 2000}
+    - {C: 1.0, solver: lbfgs, penalty: l2, max_iter: 2000}
+    - {C: 10.0, solver: lbfgs, penalty: l2, max_iter: 2000}
+  catboost:
+    - {depth: 4, learning_rate: 0.03, iterations: 400}
+    - {depth: 4, learning_rate: 0.1, iterations: 400}
+    - {depth: 6, learning_rate: 0.03, iterations: 400}
+    - {depth: 6, learning_rate: 0.1, iterations: 400}
+  lightgbm:
+    - {num_leaves: 15, max_depth: 5, learning_rate: 0.03, min_child_samples: 20, n_estimators: 400}
+    - {num_leaves: 15, max_depth: 5, learning_rate: 0.1, min_child_samples: 20, n_estimators: 400}
+    - {num_leaves: 31, max_depth: 7, learning_rate: 0.03, min_child_samples: 20, n_estimators: 400}
+    - {num_leaves: 31, max_depth: 7, learning_rate: 0.1, min_child_samples: 20, n_estimators: 400}
+evaluation:
+  primary: "sklearn.metrics.average_precision_score"
+  secondary: [roc_auc, brier_score, binary_log_loss]
+  thresholds: [0.5, "validation maximum-F1; ties higher recall then lower threshold"]
+  capacities_percent: [1, 5, 10, 20]
+  bootstrap_replicates: 1000
+selection: "highest full-precision validation Average Precision; then lower Brier; then earlier/simpler configured candidate"
+determinism: {cpu_only: true, thread_count: 1, prediction_tolerance: 1.0e-12}
+paths:
+  report_dir: "reports/generated/olist/phase2a"
+  artifact_dir: "artifacts/experiments/olist/phase2a/olist-phase2a-strict-core-v1"
+final_test:
+  requires_locked_manifest_hash: true
+  one_time_ledger: true
+  overwrite: false
+limitations:
+  - "Local retrospective offline research only; stored estimate approval-time immutability is unverified."
+  - "Legal/licensing, production readiness, and Egyptian-market external validity remain NO-GO."
+  - "Olist remains independent from Instacart and Amazon Reviews."

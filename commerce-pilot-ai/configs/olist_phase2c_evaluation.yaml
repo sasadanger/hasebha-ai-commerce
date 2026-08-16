@@ -1,0 +1,88 @@
+schema_version: olist-phase2c-evaluation-v1
+status: PLANNING_ONLY
+created_utc: "2026-08-09T00:00:00+00:00"
+
+model_comparison_design:
+  hypothesis: >
+    Does adding AS-OF-safe information (structured Expanded features once
+    verified, and/or future AS-OF-safe NLP information) provide stable
+    incremental predictive and/or business value beyond the Strict-core
+    structured baseline, without relying on any feature whose approval-time
+    availability is unproven?
+  models:
+    model_a:
+      name: Structured-only (Strict core)
+      description: "The already-approved 9-feature Strict core (configs/olist_feature_contract_v1.yaml), locked champion CatBoost"
+      status: EXISTS (Phase 2A)
+    model_b:
+      name: NLP-only
+      description: "Text-derived features only, no structured Expanded features"
+      status: NOT_RUN — depends on NLP execution readiness (see olist_phase2c_nlp_contract.yaml); DEFERRED
+    model_c:
+      name: Structured + NLP
+      description: "Strict core plus AS-OF-proven structured Expanded features plus AS-OF-proven NLP features"
+      status: NOT_RUN — depends on both AS-OF verification and NLP readiness; DEFERRED
+    model_d:
+      name: Structured + NLP + externally validated Egyptian signals
+      description: "Optional future model once Egyptian evidence exists"
+      status: NOT_RUN — depends on Egyptian data existing at all; OUT_OF_SCOPE until then
+  note: "No model in this list is trained, retrained, or scored by this planning gate."
+
+required_evidence_per_comparison:
+  - fold-level Average Precision (AP)
+  - macro AP (unweighted mean of fold AP)
+  - pooled AP (AP over concatenated out-of-fold predictions)
+  - ROC-AUC
+  - Brier score
+  - log-loss
+  - calibration curve / reliability assessment
+  - paired-bootstrap confidence intervals (method consistent with reports/generated/olist/phase2b/correction_v1/corrected_paired_bootstrap.json)
+  - per-fold direction consistency (folds_improved count, as used in Phase 2B)
+  - coverage (fraction of orders with non-missing eligible features/text)
+  - subgroup performance (e.g. by state, product category, seller) where lawful and supported
+  - stability across folds/time
+  - business-cost impact (once cost inputs are supplied by a business owner)
+  note: >
+    A single aggregate metric is never sufficient to claim incremental value,
+    matching the exact numerical-conflation defect corrected in Phase 2B
+    (the 0.014504 pooled-vs-macro mislabeling).
+
+evidence_label_vocabulary:
+  - NO_INCREMENTAL_SIGNAL
+  - INCONCLUSIVE_INCREMENTAL_SIGNAL
+  - SUPPORTED_INCREMENTAL_SIGNAL
+  gate_rule: >
+    SUPPORTED_INCREMENTAL_SIGNAL requires both statistical support AND proven
+    AS-OF availability for every feature/text source contributing to the
+    result, per src/modeling/olist/temporal_validation.py::corrected_evidence_label.
+    This rule applies uniformly to structured and NLP evidence in Phase 2C
+    and beyond.
+
+calibration_and_thresholds:
+  system_type_decision:
+    options: [ranking, classification, risk_scoring, decision_recommendation]
+    decision: NOT_YET_MADE
+    note: >
+      docs/olist_future_delivery_risk_spec.md describes a "risk level" and
+      "suggested operational action" — closer to risk_scoring feeding a
+      decision_recommendation than plain classification. This must be
+      confirmed with the operations stakeholder before Phase 2C produces a
+      calibrated score, not assumed here.
+  threshold_policy:
+    - "No threshold is tuned or locked in this planning gate."
+    - "Any future threshold selection must use development/validation folds only."
+    - "Protected Phase 2A Test data must never be used for threshold selection, per protected-Test policy in docs/olist_phase2c_protocol.md."
+
+business_value_evaluation:
+  status: DEFERRED — requires business-owner input
+  required_inputs_not_yet_available:
+    - precision at actionable capacity
+    - recall at actionable capacity
+    - cost-sensitive thresholding parameters
+    - expected intervention cost
+    - false-positive cost
+    - false-negative cost
+    - prevented-loss estimate
+    - customer-experience impact weighting
+    - operational/human review capacity
+  note: "No business cost value is invented anywhere in this contract; all are explicitly marked unknown pending stakeholder input, per docs/project_charter.md success criteria."

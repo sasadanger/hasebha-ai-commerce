@@ -1,0 +1,17 @@
+# Business Decision Engine — transparent, configuration-driven rules (Phase 4/Z).
+# No model is trained for decisioning itself; this is a rules layer over the
+# outputs of the ML services (fulfillment risk, NLP, recommendations).
+schema_version: decision-engine-rules-v1
+
+thresholds:
+  fulfillment_risk_high: 0.5
+  recommendation_strength_strong: 0.6
+
+# issue types (from the Egyptian annotation taxonomy) that count as a
+# service-affecting delivery/fulfillment complaint for escalation purposes
+service_priority_complaint_types:
+  - delivery_delay
+  - damaged_product
+  - wrong_item
+  - missing_item
+  - return_refund

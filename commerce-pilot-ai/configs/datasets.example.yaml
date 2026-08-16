@@ -1,0 +1,38 @@
+# Phase 1A source configuration. Paths are relative to the project root.
+# Copy this file to datasets.local.yaml for local overrides; that file is ignored.
+datasets:
+  olist:
+    owner: "Olist"
+    source_page_url: "https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce"
+    source_url: "https://www.kaggle.com/api/v1/datasets/download/olistbr/brazilian-ecommerce"
+    local_raw_data_path: "data/raw/olist"
+    local_processed_data_path: "data/processed/olist"
+    expected_file_format: "zip archive containing CSV files"
+    version: "Not verified"
+    license: "CC BY-NC-SA 4.0"
+    access_date: "2026-08-03"
+    checksum: "Not available from the verified source page"
+
+  instacart:
+    owner: "Instacart (competition data hosted by Kaggle)"
+    source_page_url: "https://www.kaggle.com/competitions/instacart-market-basket-analysis/data"
+    source_url: "https://www.kaggle.com/api/v1/competitions/data/download-all/instacart-market-basket-analysis"
+    local_raw_data_path: "data/raw/instacart"
+    local_processed_data_path: "data/processed/instacart"
+    expected_file_format: "zip archive containing CSV files"
+    version: "Not verified"
+    license: "Not verified; Kaggle competition rules and access terms apply"
+    access_date: "2026-08-03"
+    checksum: "Not verified"
+
+  amazon_reviews_appliances:
+    owner: "McAuley Lab, University of California San Diego"
+    source_page_url: "https://amazon-reviews-2023.github.io/main.html"
+    source_url: "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/review_categories/Appliances.jsonl.gz"
+    local_raw_data_path: "data/raw/amazon_reviews_appliances"
+    local_processed_data_path: "data/processed/amazon_reviews_appliances"
+    expected_file_format: "gzip-compressed JSON Lines"
+    version: "Amazon Reviews 2023"
+    license: "Not verified; no dataset license was identified on the verified project page"
+    access_date: "2026-08-03"
+    checksum: "Not available from the verified source page"

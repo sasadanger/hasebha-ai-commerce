@@ -1,0 +1,61 @@
+# NLP champion/finalist freeze registry — Phase 1 of the 2026-08-11 autonomous window.
+#
+# Records the frozen promotion decisions from
+# reports/checkpoints/phase2c_nlp_transformer_finalist_confirmation_2026-08-11/
+# (3-seed confirmation: seeds 101/202/303, fixed split seed 20260809).
+#
+# This is a record of RECOMMENDATIONS, not an executed promotion: no champion
+# artifact has been overwritten. champion_promotion_executed stays false until
+# explicit user authorization is given (see phase2c_nlp_transformer_finalist_
+# confirmation_2026-08-11/CURRENT_STATE.md, "Next gate").
+schema_version: nlp-champion-registry-v1
+frozen_at: "2026-08-11"
+source_checkpoint: reports/checkpoints/phase2c_nlp_transformer_finalist_confirmation_2026-08-11
+champion_promotion_executed: false
+
+tasks:
+  MPOLD:
+    recommendation: PROMOTION_RECOMMENDED
+    frozen_finalists:
+      - model_name: UBC-NLP/MARBERT
+        revision: 88e1fa192dd723cf0b3563500aec46209762eb22
+        mean_macro_f1: 0.8280
+        std: 0.0111
+    classical_frozen_baseline_macro_f1: 0.6634
+    status: single clear winner, no tie-break needed
+
+  ASTD:
+    recommendation: PROMOTION_RECOMMENDED
+    frozen_finalists:
+      - model_name: UBC-NLP/MARBERT
+        revision: 88e1fa192dd723cf0b3563500aec46209762eb22
+        mean_macro_f1: 0.5855
+        std: 0.0100
+    classical_frozen_baseline_macro_f1: 0.3938
+    status: single clear winner, no tie-break needed
+    watch: NEUTRAL class remains weakest (mean F1 0.375) if promoted
+
+  LABR:
+    recommendation: PROMOTION_RECOMMENDED_AT_FAMILY_LEVEL
+    frozen_finalists:
+      - model_name: UBC-NLP/MARBERT
+        revision: 88e1fa192dd723cf0b3563500aec46209762eb22
+        mean_macro_f1: 0.4872
+        std: 0.0069
+      - model_name: aubmindlab/bert-base-arabertv2
+        revision: 97522efce17efa33036ac619802d5cec238dcad9
+        mean_macro_f1: 0.4827
+        std: 0.0025
+    classical_frozen_baseline_macro_f1: 0.4135
+    status: INCONCLUSIVE — both finalists retained frozen; mean diff 0.0045,
+      bootstrap 95% CI [-0.0081, 0.0197] includes zero. Do NOT pick MARBERT
+      merely because its mean is nominally higher. Tie-break path: Jumia
+      (Egyptian e-commerce domain) direct-transfer evaluation on both frozen
+      finalists (no fine-tuning) is the designated practical tie-break signal
+      per section N of the autonomous brief. Absent that, an explicit user
+      choice (e.g. by latency/model-size/deployment preference) is required.
+
+excluded_by_authorization:
+  - ASTD -> AraBERT (not run; excluded per authorizing brief)
+  - Amazon transformer confirmation (deferred, not cancelled; see
+    scripts/calibrate_amazon_transformer_throughput.py for calibration-only evidence)

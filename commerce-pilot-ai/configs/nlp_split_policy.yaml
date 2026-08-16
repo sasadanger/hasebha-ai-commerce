@@ -1,0 +1,140 @@
+schema_version: nlp-split-policy-v2
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+note: >
+  This defines split METHODOLOGY only. No final random split is materialized
+  in this gate, and no model is executed against any split defined here.
+
+general_split_requirements:
+  fixed_random_seed: 20260809
+  shuffle: true
+  split_generator: sklearn.model_selection.train_test_split
+  split_implementation: src/nlp/splitting.py#materialize_group_split
+  split_generator_version_lock: requirements.txt
+  hash_verification_before_split: true
+  fail_on_hash_mismatch: true
+  normalization_mode: NORMALIZED_EXACT_KEY_V2
+  duplicate_contract: configs/nlp_duplicate_control_contract_v2.yaml
+  duplicate_isolation_before_split: "Mandatory -- apply configs/nlp_duplicate_control_contract_v2.yaml NORMALIZED_EXACT_KEY grouping before any split assignment."
+  stratification: "Applied by label_field when class counts permit (see class-imbalance policy); disabled if any class has fewer than min_class_count_for_stratification."
+  min_class_count_for_stratification: 30
+  no_same_normalized_text_across_splits: mandatory
+  source_platform_awareness: "Split reporting must record platform (Twitter/X, Amazon, Goodreads, multiplatform) per row so platform effects are never silently pooled (Step 31)."
+  dataset_identity_preservation: "Every row retains its source dataset_id through any split/merge so provenance is traceable end-to-end."
+
+deterministic_materialization:
+  group_key: NORMALIZED_EXACT_KEY from src/nlp/duplicate_control.py
+  ordering_before_split: lexicographic_group_key
+  first_stage:
+    operation: select train groups from all eligible groups
+    train_size: 0.70
+    remainder_size: 0.30
+    random_seed: 20260809
+  second_stage:
+    operation: split remainder into validation and internal test
+    validation_share_of_remainder: 0.50
+    internal_test_share_of_remainder: 0.50
+    derivation: "15 / (15 + 15) = 0.50 for each"
+    random_seed: 20260810
+  stratification_unit: group-level task-native label
+  stratification_minimum: "Stage 1 stratifies when every class has at least 30 eligible groups; Stage 2 stratifies when every remainder class has at least 2 groups; otherwise that stage is deterministically unstratified."
+  conflicting_group_actions:
+    REMOVE_FROM_ALL_SPLITS: exclude group before materialization
+    KEEP_IN_TRAIN_ONLY_WITH_FLAG: force group to train before materialization
+    FAIL: raise ValueError
+  invalid_input_action: fail_closed
+
+# Step 8 -- conflicting-label policy, chosen per task, not applied uniformly.
+conflicting_label_policy:
+  default: DO_NOT_AUTO_RESOLVE
+  per_task:
+    SENTIMENT:
+      policy: REMOVE_FROM_ALL_SPLITS
+      rationale: "Sentiment is the primary target for the earliest planned experiments (A/B); ambiguous ground truth should not silently enter train or test. Applies to Egyptian Tweets 40K and ArSAS pending their mandatory duplicate reaudits."
+    SPEECH_ACT:
+      policy: DATASET_SPECIFIC_REVIEW
+      rationale: "Speech-act conflicts (if any, not yet separately audited) require ArSAS-specific inspection before a default is chosen."
+    OFFENSIVE_LANGUAGE_SAFETY:
+      policy: DO_NOT_AUTO_RESOLVE
+      rationale: "MPOLD reported 0 duplicates in the independently-reproduced audit; no conflicting-label cases currently known. Policy recorded for completeness only."
+    REVIEW_RATING:
+      policy: KEEP_IN_TRAIN_ONLY_WITH_FLAG
+      rationale: "Star-rating conflicts on identical text are plausible (e.g. re-reviews) and rating noise is an expected, not anomalous, part of the review-rating task; flagging preserves signal while preventing silent contamination of validation/test."
+  explicit_prohibition: "No majority-vote auto-resolution is applied anywhere without a dataset-specific, documented justification recorded in this file first."
+
+# Step 9 -- per-experiment-family split shape. Filled in only for experiment
+# families with an acquired, active dataset (A-E); F/G/H remain BLOCKED/PENDING
+# and have no split defined until their data is acquired.
+experiment_splits:
+  EXPERIMENT_A_english_ecommerce_review_baseline:
+    dataset_id: amazon_appliances
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: overall
+  EXPERIMENT_B1_egyptian_tweets_only:
+    dataset_id: egyptian_tweets_corpus_40k
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: label
+    prerequisite: EGYPTIAN_TWEETS_DUPLICATE_REAUDIT_REQUIRED must be resolved first
+  EXPERIMENT_B2_astd_only:
+    dataset_id: astd
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: label
+  EXPERIMENT_B3_cross_domain:
+    train_dataset_id: astd
+    external_test_dataset_id: egyptian_tweets_corpus_40k
+    train_pct: 85
+    validation_pct: 15
+    test_pct: 0
+    note: "External test uses the full held-out portion of the other dataset after cross_dataset_exact_overlap check; no internal test split needed."
+  EXPERIMENT_C_labr_domain_robustness:
+    dataset_id: labr
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: rating
+  EXPERIMENT_D1_arsas_sentiment:
+    dataset_id: arsas
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: Sentiment_label
+    prerequisite: ARSAS_DUPLICATE_REAUDIT_REQUIRED must be resolved first
+  EXPERIMENT_D2_arsas_speech_act:
+    dataset_id: arsas
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: Speech_act_label
+    prerequisite: ARSAS_DUPLICATE_REAUDIT_REQUIRED must be resolved first
+  EXPERIMENT_E_mpold_safety:
+    dataset_id: mpold
+    train_pct: 70
+    validation_pct: 15
+    test_pct: 15
+    external_test: null
+    stratify_by: Majority_Label
+
+# Step 10 -- NLP evaluation governance, explicitly separate from the sealed
+# Phase 2A structured Test set, which is never reused for NLP.
+nlp_test_set_governance:
+  NLP_DEVELOPMENT_VALIDATION:
+    definition: "The validation_pct portion of an experiment's own dataset split, used for iterative model selection. May be inspected repeatedly during development."
+  NLP_INTERNAL_TEST:
+    definition: "The test_pct portion of an experiment's own dataset split. Intended to be consulted sparingly (not per-iteration) once a future training gate authorizes model runs; sealing/access-tracking policy for this set is deferred to the training authorization gate (Step 41), not defined here."
+  NLP_EXTERNAL_DATASET_TEST:
+    definition: "A held-out portion of a DIFFERENT dataset than the one trained on (e.g. Experiment B3: train on ASTD, external-test on Egyptian Tweets 40K). Measures cross-domain/cross-corpus generalization, not in-domain accuracy."
+  FUTURE_EGYPTIAN_FIRST_PARTY_SEALED_TEST:
+    definition: "Not yet constituted -- no first-party Egyptian commerce text data currently exists in this project (Step 36/Experiment H). When it does, it must follow the same seal/access-ledger/access-count discipline already established for the Phase 2A structured Test set before being used to claim Egyptian-commerce readiness."
+  explicit_non_reuse_rule: "The Phase 2A structured Test set (reports/generated/olist/phase2a/test_access_ledger.json) is never read, referenced, or counted as evidence for any NLP experiment. Its access_count remains 1 throughout this gate."

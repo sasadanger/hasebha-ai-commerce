@@ -1,0 +1,193 @@
+schema_version: nlp-training-batch-authorization-v2
+authorization_scope: NLP_TRAINING_AUTHORIZATION_REMEDIATION_ONLY
+previous_package: reports/checkpoints/phase2c_nlp_training_authorization_2026-08-09/
+previous_package_status: SUPERSEDED_REJECTED_HISTORICAL
+candidate_status: PENDING_INDEPENDENT_REVIEW
+
+current_session:
+  model_training_authorized: false
+  nlp_model_training_authorized: false
+  nlp_fine_tuning_authorized: false
+  nlp_embedding_execution_authorized: false
+  prediction_generation_authorized: false
+  protected_test_access_authorized: false
+  egyptian_commerce_validation_authorized: false
+  production_authorized: false
+  commercial_use_authorized: false
+  training_executed: false
+
+future_candidate_boundaries:
+  effective_only_after_independent_approval: true
+  research_only: true
+  commercial_use_authorized: false
+  transformer_fine_tuning_authorized: false
+  embedding_model_authorized: false
+  neural_model_authorized: false
+  pretrained_model_execution_authorized: false
+  automl_authorized: false
+  random_search_authorized: false
+  bayesian_search_authorized: false
+  unrestricted_tuning_authorized: false
+  test_driven_tuning_authorized: false
+
+common_contract:
+  normalization_contract: configs/nlp_text_normalization_contract_v2.yaml
+  duplicate_contract: configs/nlp_duplicate_control_contract_v2.yaml
+  metric_contract: configs/nlp_metric_contract_v2.yaml
+  label_ontology: configs/nlp_label_ontology_v2.yaml
+  split_contract: configs/nlp_split_policy.yaml
+  fixed_split_seed: 20260809
+  fixed_model_seed: 42
+  cv_enabled: false
+  cv_seed: 20260809
+  shuffle: true
+  normalization_mode: NORMALIZED_EXACT_KEY_V2
+  lowercase_in_vectorizer: false
+  language_mode: DATASET_NATIVE
+  preserve_emoji: true
+  replace_urls: true
+  replace_mentions: true
+  normalize_repeated_punctuation: true
+  generate_embeddings: false
+  hash_verification_before_read: true
+  fail_on_hash_mismatch: true
+  input_paths_from_registry_only: true
+  protected_test_access: false
+  feature_selection_enabled: false
+  calibration_enabled: false
+  probability_calibration_enabled: false
+  threshold_optimization_enabled: false
+  resampling_enabled: false
+  dimensionality_reduction_enabled: false
+  external_embeddings_enabled: false
+  transformer_embeddings_enabled: false
+  additional_hyperparameter_search_enabled: false
+  maximum_learned_configurations_per_experiment: 6
+  configuration_selection_rule: "Execute every configuration explicitly listed for that experiment exactly once; never form a Cartesian product or add an undeclared configuration. Dummy/majority is a non-learned metric floor and is not counted."
+  output_root: artifacts/experiments/nlp/phase2c/batch1/<experiment_id>/<run_id>/
+  non_overwrite_rule: "run_id directory MUST NOT exist before execution; fail closed if it exists; no output file may replace an existing path."
+  required_outputs: [config, dataset_hashes, prepared_split_hashes, environment_metadata, metrics, allowed_split_predictions, model_artifact, run_manifest]
+  evaluation_states: [NLP_DEV_TRAIN, NLP_DEV_VALIDATION, NLP_INTERNAL_TEST, NLP_EXTERNAL_TEST]
+  internal_test_ledger_required_before_materialization: true
+  phase2a_structured_test_reuse: FORBIDDEN
+
+execution_defaults:
+  tfidf_vectorizer:
+    analyzer: word
+    binary: false
+    decode_error: strict
+    dtype: float64
+    encoding: utf-8
+    lowercase: false
+    max_df: 1.0
+    max_features: null
+    min_df: 1
+    ngram_range: [1, 1]
+    norm: l2
+    preprocessor: null
+    smooth_idf: true
+    stop_words: null
+    strip_accents: null
+    sublinear_tf: false
+    token_pattern: "(?u)\\b\\w\\w+\\b"
+    tokenizer: null
+    use_idf: true
+    vocabulary: null
+  logistic_regression:
+    C: 1.0
+    class_weight: balanced
+    dual: false
+    fit_intercept: true
+    intercept_scaling: 1
+    l1_ratio: 0.0
+    max_iter: 1000
+    n_jobs: 1
+    penalty: l2
+    random_state: 42
+    solver: lbfgs
+    tol: 0.0001
+    verbose: 0
+    warm_start: false
+  linear_svm:
+    C: 1.0
+    class_weight: balanced
+    dual: auto
+    fit_intercept: true
+    intercept_scaling: 1
+    loss: squared_hinge
+    max_iter: 1000
+    multi_class: ovr
+    penalty: l2
+    random_state: 42
+    tol: 0.0001
+    verbose: 0
+  multinomial_naive_bayes:
+    alpha: 1.0
+    class_prior: null
+    fit_prior: true
+    force_alpha: true
+
+classical_configurations:
+  review_four: &review_four
+    - {configuration_id: tfidf_word_unigram_logreg, model_family: TFIDF_LOGISTIC_REGRESSION, vectorizer: {analyzer: word, ngram_range: [1, 1], min_df: 2}, classifier: {C: 1.0, class_weight: balanced, max_iter: 1000}, seed: 42}
+    - {configuration_id: tfidf_word_bigram_logreg, model_family: TFIDF_LOGISTIC_REGRESSION, vectorizer: {analyzer: word, ngram_range: [1, 2], min_df: 5}, classifier: {C: 1.0, class_weight: balanced, max_iter: 1000}, seed: 42}
+    - {configuration_id: tfidf_word_unigram_linear_svm, model_family: TFIDF_LINEAR_SVM, vectorizer: {analyzer: word, ngram_range: [1, 1], min_df: 2}, classifier: {C: 1.0, class_weight: balanced}, seed: 42}
+    - {configuration_id: tfidf_word_bigram_linear_svm, model_family: TFIDF_LINEAR_SVM, vectorizer: {analyzer: word, ngram_range: [1, 2], min_df: 5}, classifier: {C: 1.0, class_weight: balanced}, seed: 42}
+  short_text_six: &short_text_six
+    - {configuration_id: tfidf_word_unigram_logreg, model_family: TFIDF_LOGISTIC_REGRESSION, vectorizer: {analyzer: word, ngram_range: [1, 1], min_df: 2}, classifier: {C: 1.0, class_weight: balanced, max_iter: 1000}, seed: 42}
+    - {configuration_id: tfidf_word_bigram_logreg, model_family: TFIDF_LOGISTIC_REGRESSION, vectorizer: {analyzer: word, ngram_range: [1, 2], min_df: 5}, classifier: {C: 1.0, class_weight: balanced, max_iter: 1000}, seed: 42}
+    - {configuration_id: tfidf_word_unigram_linear_svm, model_family: TFIDF_LINEAR_SVM, vectorizer: {analyzer: word, ngram_range: [1, 1], min_df: 2}, classifier: {C: 1.0, class_weight: balanced}, seed: 42}
+    - {configuration_id: tfidf_word_bigram_linear_svm, model_family: TFIDF_LINEAR_SVM, vectorizer: {analyzer: word, ngram_range: [1, 2], min_df: 5}, classifier: {C: 1.0, class_weight: balanced}, seed: 42}
+    - {configuration_id: tfidf_word_unigram_multinomial_nb, model_family: MULTINOMIAL_NAIVE_BAYES, vectorizer: {analyzer: word, ngram_range: [1, 1], min_df: 2}, classifier: {alpha: 1.0}, seed: 42}
+    - {configuration_id: tfidf_word_bigram_multinomial_nb, model_family: MULTINOMIAL_NAIVE_BAYES, vectorizer: {analyzer: word, ngram_range: [1, 2], min_df: 5}, classifier: {alpha: 1.0}, seed: 42}
+
+BATCH_1_CANDIDATE:
+  - experiment_id: A
+    canonical_id: EXPERIMENT_A_english_ecommerce_review_baseline
+    dataset_id: amazon_appliances
+    status: READY_FOR_REVIEW
+    task_type: FIVE_CLASS_RATING_CLASSIFICATION
+    source_label: overall
+    labels: [1, 2, 3, 4, 5]
+    primary_metric: macro_f1
+    research_only: true
+    learned_configurations: *review_four
+  - experiment_id: B2
+    canonical_id: EXPERIMENT_B2_astd_only
+    dataset_id: astd
+    status: READY_FOR_REVIEW
+    task_type: FOUR_CLASS_SENTIMENT_CLASSIFICATION
+    source_label: label
+    primary_metric: macro_f1
+    research_only: true
+    learned_configurations: *short_text_six
+  - experiment_id: C
+    canonical_id: EXPERIMENT_C_arabic_review_domain_robustness
+    dataset_id: labr
+    status: READY_FOR_REVIEW
+    task_type: FIVE_CLASS_RATING_CLASSIFICATION
+    source_label: rating
+    labels: [1, 2, 3, 4, 5]
+    primary_metric: macro_f1
+    research_only: true
+    learned_configurations: *review_four
+  - experiment_id: E
+    canonical_id: EXPERIMENT_E_multiplatform_safety_robustness
+    dataset_id: mpold
+    status: READY_FOR_REVIEW
+    task_type: BINARY_OFFENSIVE_LANGUAGE_CLASSIFICATION
+    source_label: Majority_Label
+    primary_metric: macro_f1
+    research_only: true
+    learned_configurations: *short_text_six
+
+BATCH_2_PRESERVED:
+  - {experiment_id: B1, status: DEFERRED_SEPARATE_BATCH, dataset_id: egyptian_tweets_corpus_40k}
+  - {experiment_id: B3, status: DEFERRED_PREREQUISITES, dataset_id: [astd, egyptian_tweets_corpus_40k]}
+  - {experiment_id: D1, status: DEFERRED_RESEARCH_ONLY, dataset_id: arsas}
+
+BLOCKED_FUTURE:
+  - {experiment_id: D2, status: BLOCKED, reason: ARSAS_SPEECH_ACT_CONFLICT_POLICY_UNRESOLVED}
+  - {experiment_id: F, status: BLOCKED_DATA_NOT_ACQUIRED, reason: EESA_NOT_ACQUIRED}
+  - {experiment_id: G, status: BLOCKED_GATED_ACCESS_AND_RIGHTS, reason: ADAB_ACCESS_AND_RIGHTS_UNRESOLVED}
+  - {experiment_id: H, status: BLOCKED_NO_GENUINE_DATA, reason: NO_GENUINE_EGYPTIAN_COMMERCE_OR_FIRST_PARTY_DATA}

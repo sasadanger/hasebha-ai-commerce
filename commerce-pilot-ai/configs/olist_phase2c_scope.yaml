@@ -1,0 +1,144 @@
+schema_version: olist-phase2c-scope-v1
+status: PLANNING_ONLY
+created_utc: "2026-08-09T00:00:00+00:00"
+
+primary_scientific_objective: >
+  Prove or disprove, with documented evidence rather than assumption, whether
+  the 15 Expanded features (currently UNVERIFIED_ASOF per
+  reports/generated/olist/phase2b/correction_v1/complete_fifteen_feature_audit.json)
+  were actually obtainable, unmutated, at the order_approved_at decision
+  timestamp in a production-equivalent system — i.e. resolve the single
+  blocking technical question carried since docs/modeling_readiness_gate.md:
+  "the repository does not prove the recorded estimated date is the immutable
+  promise known at approval, or that conditional item/payment/catalog
+  snapshots are complete at that time." Phase 2C is an evidence/audit
+  extension of the already-approved offline experiment, not a new modeling
+  program.
+
+coherence_statement: >
+  Phase 2C does not attempt to build production services, a recommendation
+  engine, an LLM agent layer, or a dashboard. It does not attempt Egyptian or
+  NLP modeling. Its one measurable output is a verified, evidence-backed
+  AS-OF classification for each of the 15 Expanded features (upgraded from
+  UNVERIFIED_ASOF to either PROVEN_PRIMARY_ASOF or a more specific
+  non-approved classification), plus repair of the one disclosed Phase 2B
+  technical-debt item, plus design-only contracts for the two capability
+  tracks (NLP voice-of-customer, Egyptian-market evidence) that the project
+  charter requires but that remain blocked on their own separate readiness
+  gates.
+
+scope_classification:
+  - area: structured_feature_asof_verification
+    classification: IN_SCOPE
+    reason: >
+      Directly resolves the single blocking finding carried since Phase 1C/1D
+      and restated at every Phase 2A/2B gate. Achievable by source-system/
+      documentation audit; does not require retraining unless AS-OF is proven,
+      in which case a SEPARATE re-training authorization gate is required
+      before any Test access.
+
+  - area: feature_contract_hardening
+    classification: IN_SCOPE
+    reason: >
+      configs/olist_feature_contract_v1.yaml and docs/olist_asof_feature_contract.md
+      already carry several CONDITIONALLY_ALLOWED / REQUIRES_VERIFICATION
+      entries (e.g. shipping_limit_date, payment_sequential completeness,
+      catalog snapshot completeness). Resolving these is the same activity as
+      AS-OF verification above and should be executed together.
+
+  - area: residual_generator_technical_debt_repair
+    classification: IN_SCOPE
+    reason: >
+      TECHNICAL_DEBT_ID=PHASE2B_ASOF_LABEL_GENERATOR_DEBT
+      (src/modeling/olist/phase2b_sensitivity.py) must be resolved before any
+      Phase 2C sub-step that regenerates evidence labels. See Step 4 decision
+      in PHASE2C_AUTHORIZATION_RECORD. Not executed during this gate.
+
+  - area: nlp_experiment_design
+    classification: IN_SCOPE_DESIGN_ONLY
+    reason: >
+      A scientific contract must exist (this gate's prohibition against
+      silent NLP omission). Execution is DEFERRED — see nlp track decision
+      below.
+
+  - area: nlp_execution_amazon_appliances
+    classification: DEFERRED
+    reason: >
+      docs/modeling_readiness_gate.md records Amazon Appliances as NO-GO:
+      license Not verified, no task/label/language/annotation policy, no
+      approved split strategy. These are prerequisites entirely outside
+      Olist Phase 2C's control and belong to the separate voice-of-customer
+      capability track defined in docs/project_charter.md.
+    deferred_to: "Voice-of-customer capability Phase 2 readiness resolution (outside this Olist Phase 2C)"
+
+  - area: nlp_execution_olist_reviews
+    classification: OUT_OF_SCOPE
+    reason: >
+      docs/olist_asof_feature_contract.md classifies the entire Olist review
+      table FORBIDDEN for the late_delivery target: reviews are created
+      after delivery and are direct post-approval/post-outcome leakage for
+      this decision point. This is not a readiness gap to close later; it is
+      a structural leakage prohibition for this specific target.
+
+  - area: egyptian_dataset_mapping
+    classification: DEFERRED
+    reason: >
+      No Egyptian timestamped order-event data exists in this repository.
+      docs/olist_future_delivery_risk_spec.md states production work requires
+      timestamped Egyptian order events and documented as-of availability.
+      Phase 2C may define evidence requirements (design-only) but must not
+      fabricate or substitute Olist/Amazon data as Egyptian evidence.
+
+  - area: egyptian_external_validation
+    classification: OUT_OF_SCOPE
+    reason: "No Egyptian data exists to validate against. Cannot be attempted."
+
+  - area: combined_structured_plus_nlp_experiment_design
+    classification: DEFERRED
+    reason: "Depends on both structured AS-OF verification (in progress) and NLP execution readiness (blocked). Design only, once both tracks progress."
+
+  - area: calibration
+    classification: DEFERRED
+    reason: "No production-approved feature set yet exists to calibrate; premature until AS-OF verification concludes."
+
+  - area: decision_thresholds
+    classification: DEFERRED
+    reason: "Requires business-owner cost input (UNKNOWN_REQUIRES_BUSINESS_INPUT); cannot be set unilaterally."
+
+  - area: business_cost_evaluation
+    classification: DEFERRED
+    reason: "Requires operations/fulfillment stakeholder input not currently available in the repository."
+
+  - area: model_monitoring_architecture
+    classification: DESIGN_ONLY
+    reason: "Charter Phase 6 (Operational validation) scope; premature to build, reasonable to sketch design boundaries only."
+
+  - area: production_api_design
+    classification: OUT_OF_SCOPE
+    reason: "Charter Phase 5 scope; no validated capability exists yet to expose."
+
+  - area: recommendation_engine
+    classification: OUT_OF_SCOPE
+    reason: "Belongs to the separate Instacart personalization capability (also NO-GO per docs/modeling_readiness_gate.md), not the Olist fulfillment capability."
+
+  - area: llm_agent_layer
+    classification: DEFERRED
+    reason: "See LLM/agent boundary in docs/olist_phase2c_protocol.md. Explanation/summarization roles only ever considered post-validation; autonomous action explicitly out of scope pending a separate safety/governance gate."
+
+  - area: dashboarding
+    classification: OUT_OF_SCOPE
+    reason: "Charter Phase 5 scope; no Decision Action Card contract exists yet to display."
+
+  - area: deployment
+    classification: OUT_OF_SCOPE
+    reason: "Charter Phase 6 scope; no production-approved model exists."
+
+phase2c_execution_boundary: >
+  Phase 2C execution (if authorized) is limited to: (1) AS-OF/source-system
+  evidence audit for the 15 Expanded features and the CONDITIONALLY_ALLOWED /
+  REQUIRES_VERIFICATION entries in the existing feature contracts; (2) repair
+  of PHASE2B_ASOF_LABEL_GENERATOR_DEBT; (3) authoring the design-only NLP and
+  Egyptian-market evidence-requirement contracts. No training, no prediction
+  regeneration, and no Test access are authorized by Phase 2C on their own —
+  each would require its own separate, explicit authorization gate referencing
+  the AS-OF audit's outcome.

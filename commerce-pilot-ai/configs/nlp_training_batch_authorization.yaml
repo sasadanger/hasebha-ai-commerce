@@ -1,0 +1,131 @@
+schema_version: nlp-training-batch-authorization-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_TRAINING_AUTHORIZATION_REVIEW_ONLY
+current_session:
+  training_executed: false
+  model_training_authorized: false
+  prediction_generation_authorized: false
+  embedding_execution_authorized: false
+future_authorization:
+  NLP_BATCH1_TRAINING_AUTHORIZED: true
+  effective_only_after_independent_review: true
+  research_only: true
+  commercial_use_authorized: false
+  transformer_fine_tuning_authorized: false
+  automl_authorized: false
+  unrestricted_hyperparameter_search_authorized: false
+common_batch1_contract:
+  allowed_model_families: [DummyClassifier, TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM]
+  optional_model_family: [MULTINOMIAL_NAIVE_BAYES_SHORT_TEXT_ONLY]
+  allowed_preprocessing: [configs/nlp_text_normalization_contract.yaml, configs/nlp_duplicate_control_contract.yaml]
+  fixed_split_seed: 20260809
+  fixed_model_seed: 42
+  hyperparameter_boundary:
+    tfidf_ngram_ranges: [[1, 1], [1, 2]]
+    tfidf_min_df: [2, 5]
+    logistic_regression_C: [1.0]
+    linear_svm_C: [1.0]
+    maximum_declared_learned_configurations_per_experiment: 6
+    forbidden: [AutoML, random_search, Bayesian_search, test_driven_tuning, transformer_fine_tuning]
+  evaluation_states: [NLP_DEV_TRAIN, NLP_DEV_VALIDATION, NLP_INTERNAL_TEST, NLP_EXTERNAL_TEST]
+  internal_test_ledger_required_before_materialization: true
+  output_root: artifacts/experiments/nlp/phase2c/batch1/<experiment_id>/<run_id>/
+  required_outputs: [config, dataset_hashes, prepared_split_hashes, environment_metadata, metrics, allowed_split_predictions, model_artifact, run_manifest]
+BATCH_1:
+  - experiment_id: EXPERIMENT_A_english_ecommerce_review_baseline
+    authorization_status: AUTHORIZED_FOR_FUTURE_BATCH_1_PENDING_INDEPENDENT_REVIEW
+    dataset_id: amazon_appliances
+    task: REVIEW_RATING
+    allowed_model_families: [DummyClassifier, TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM]
+    allowed_preprocessing: [CANONICAL_NORMALIZATION, NORMALIZED_EXACT_DEDUP]
+    allowed_metrics: [macro_f1, per_class_precision_recall_f1, confusion_matrix]
+    allowed_splits: [configs/nlp_split_policy.yaml#EXPERIMENT_A_english_ecommerce_review_baseline]
+    primary_metric: macro_f1
+    baseline_comparison: majority_class
+    failure_criteria: [cross_split_duplicate, hash_mismatch, class_collapse, unreproducible_preparation]
+    research_only: true
+    commercial_use_authorized: false
+    reason: Native five-star review-rating pipeline baseline; no derived sentiment mapping.
+    blocking_requirements: []
+    training_executed: false
+  - experiment_id: EXPERIMENT_B2_astd_only
+    authorization_status: AUTHORIZED_FOR_FUTURE_BATCH_1_PENDING_INDEPENDENT_REVIEW
+    dataset_id: astd
+    task: SENTIMENT
+    allowed_model_families: [DummyClassifier, TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM, MULTINOMIAL_NAIVE_BAYES]
+    allowed_preprocessing: [CANONICAL_NORMALIZATION, NORMALIZED_EXACT_DEDUP]
+    allowed_metrics: [macro_f1, per_class_precision_recall_f1, confusion_matrix]
+    allowed_splits: [configs/nlp_split_policy.yaml#EXPERIMENT_B2_astd_only]
+    primary_metric: macro_f1
+    baseline_comparison: majority_class
+    failure_criteria: [cross_split_duplicate, hash_mismatch, class_collapse, unreproducible_preparation]
+    research_only: true
+    commercial_use_authorized: false
+    reason: Standalone native four-class Egyptian social sentiment baseline; no pooling.
+    blocking_requirements: []
+    training_executed: false
+  - experiment_id: EXPERIMENT_C_arabic_review_domain_robustness
+    authorization_status: AUTHORIZED_FOR_FUTURE_BATCH_1_PENDING_INDEPENDENT_REVIEW
+    dataset_id: labr
+    task: REVIEW_RATING
+    allowed_model_families: [DummyClassifier, TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM]
+    allowed_preprocessing: [CANONICAL_NORMALIZATION, NORMALIZED_EXACT_DEDUP]
+    allowed_metrics: [macro_f1, per_class_precision_recall_f1, confusion_matrix]
+    allowed_splits: [configs/nlp_split_policy.yaml#EXPERIMENT_C_labr_domain_robustness]
+    primary_metric: macro_f1
+    baseline_comparison: majority_class
+    failure_criteria: [cross_split_duplicate, hash_mismatch, class_collapse, unreproducible_preparation]
+    research_only: true
+    commercial_use_authorized: false
+    reason: Native Arabic review-rating robustness only; not Egyptian or e-commerce evidence.
+    blocking_requirements: []
+    training_executed: false
+  - experiment_id: EXPERIMENT_E_multiplatform_safety_robustness
+    authorization_status: AUTHORIZED_FOR_FUTURE_BATCH_1_PENDING_INDEPENDENT_REVIEW
+    dataset_id: mpold
+    task: OFFENSIVE_LANGUAGE_SAFETY
+    allowed_model_families: [DummyClassifier, TFIDF_LOGISTIC_REGRESSION, TFIDF_LINEAR_SVM, MULTINOMIAL_NAIVE_BAYES]
+    allowed_preprocessing: [CANONICAL_NORMALIZATION, NORMALIZED_EXACT_DEDUP]
+    allowed_metrics: [macro_f1, minority_class_recall, per_class_precision_recall_f1, confusion_matrix]
+    allowed_splits: [configs/nlp_split_policy.yaml#EXPERIMENT_E_mpold_safety]
+    primary_metric: macro_f1
+    baseline_comparison: majority_class
+    failure_criteria: [cross_split_duplicate, hash_mismatch, class_collapse, unreproducible_preparation]
+    research_only: true
+    commercial_use_authorized: false
+    reason: Native offensive-language task only; never sentiment.
+    blocking_requirements: []
+    training_executed: false
+BATCH_2:
+  - experiment_id: EXPERIMENT_B1_egyptian_tweets_only
+    authorization_status: AUTHORIZED_FOR_FUTURE_BATCH_2_PENDING_BATCH1_AND_INDEPENDENT_REVIEW
+    dataset_id: egyptian_tweets_corpus_40k
+    task: SENTIMENT
+    research_only: true
+    commercial_use_authorized: false
+    reason: Reaudit passed, but deferred to keep Batch 1 small and establish infrastructure first.
+    blocking_requirements: [BATCH_1_PIPELINE_EVIDENCE]
+    training_executed: false
+  - experiment_id: EXPERIMENT_B3_cross_domain_generalization
+    authorization_status: FUTURE_BATCH_2
+    dataset_id: [astd, egyptian_tweets_corpus_40k]
+    task: SENTIMENT_EXTERNAL_EVALUATION
+    research_only: true
+    commercial_use_authorized: false
+    reason: Requires completed standalone B1 and B2 baselines plus normalized cross-dataset overlap audit and label-direction contract.
+    blocking_requirements: [B1_COMPLETE, B2_COMPLETE, CROSS_DATASET_OVERLAP, DIRECTION_SPECIFIC_LABEL_MAPPING]
+    training_executed: false
+  - experiment_id: EXPERIMENT_D1_arsas_sentiment
+    authorization_status: AUTHORIZED_FOR_FUTURE_BATCH_2_RESEARCH_ONLY_PENDING_INDEPENDENT_REVIEW
+    dataset_id: arsas
+    task: SENTIMENT
+    research_only: true
+    commercial_use_authorized: false
+    reason: Sentiment reaudit passed and conflicts have a removal policy; no dataset license is stated.
+    blocking_requirements: [BATCH_1_PIPELINE_EVIDENCE, CONTINUE_RESEARCH_ONLY_RIGHTS_CONTAINMENT]
+    training_executed: false
+BLOCKED_FUTURE:
+  - {experiment_id: EXPERIMENT_D2_arsas_speech_act, authorization_status: BLOCKED, dataset_id: arsas, task: SPEECH_ACT, research_only: true, commercial_use_authorized: false, reason: Speech-act conflict policy is dataset-specific and unresolved, blocking_requirements: [ARSAS_SPEECH_ACT_CONFLICT_POLICY], training_executed: false}
+  - {experiment_id: EXPERIMENT_F_egyptian_arabic_english_code_switch, authorization_status: BLOCKED, dataset_id: eesa_named_dataset, task: SENTIMENT_CODE_SWITCH, research_only: true, commercial_use_authorized: false, reason: Data not acquired, blocking_requirements: [OFFICIAL_DATA_ACQUISITION, RIGHTS_AND_QUALITY_AUDIT], training_executed: false}
+  - {experiment_id: EXPERIMENT_G_customer_service_ecommerce_politeness_intent, authorization_status: BLOCKED, dataset_id: adab_politeness, task: POLITENESS, research_only: true, commercial_use_authorized: false, reason: Gated access and data-rights verification unresolved, blocking_requirements: [GATED_ACCESS, DATA_RIGHTS, QUALITY_AUDIT], training_executed: false}
+  - {experiment_id: EXPERIMENT_H_true_egyptian_commerce_validation, authorization_status: BLOCKED, dataset_id: null, task: [COMPLAINT_DETECTION, CUSTOMER_INTENT], research_only: true, commercial_use_authorized: false, reason: Genuine Egyptian commerce or first-party data does not exist locally, blocking_requirements: [FIRST_PARTY_EGYPTIAN_COMMERCE_DATA, CONSENT_LEGAL_BASIS, LABEL_CONTRACT], training_executed: false}

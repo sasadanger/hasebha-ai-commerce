@@ -1,0 +1,78 @@
+schema_version: nlp-metric-contract-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+
+primary_metric_by_task:
+  SENTIMENT: macro_F1
+  SPEECH_ACT: macro_F1
+  OFFENSIVE_LANGUAGE_SAFETY: macro_F1
+  REVIEW_RATING: macro_F1_on_binned_classes  # not raw accuracy on 5-way ordinal
+  POLITENESS: macro_F1  # deferred, BLOCKED_BY_DATA
+
+rationale: >
+  Every active task has meaningful class imbalance (MPOLD 3325:675 ~ 5:1;
+  ArSAS Mixed=1219 vs Negative=7384 ~ 6:1; Egyptian Tweets 40K is the only
+  near-balanced case at ~1:1). Accuracy alone is misleading whenever any class
+  is a minority, so macro F1 (unweighted mean of per-class F1) is the primary
+  metric everywhere, per Step 21's explicit instruction. Accuracy is retained
+  as a secondary/reportable metric only.
+
+secondary_metrics_all_tasks:
+  - weighted_F1
+  - per_class_precision
+  - per_class_recall
+  - per_class_F1
+  - accuracy
+  - balanced_accuracy
+  - confusion_matrix
+
+conditional_metrics:
+  PR_AUC:
+    use_when: "Binary task with probability output and meaningful positive-class imbalance"
+    applies_to_candidates: [egyptian_tweets_corpus_40k_sentiment, mpold_offensive]
+  ROC_AUC:
+    use_when: "Binary task where both classes are of comparable practical interest"
+    applies_to_candidates: [egyptian_tweets_corpus_40k_sentiment]
+
+calibration:
+  # Step 22
+  required_by_default: false
+  rationale: "All currently-defined experiments (A-E) are research/benchmark tasks, not tasks producing an actionable business confidence score. Calibration is not required for every research-only task per the governing instructions."
+  required_when: "A future experiment's output is consumed as an actionable probability by a downstream business decision (e.g. a future complaint-routing signal) -- not true for any currently-defined experiment."
+  candidate_metrics_if_required: [brier_score, expected_calibration_error, reliability_curve]
+
+statistical_comparison_policy:
+  # Step 23 -- design only, not performed in this gate.
+  method_for_paired_classifiers: paired_bootstrap
+  method_for_paired_predictions_same_test_set: mcnemar_test
+  confidence_intervals: "95% CI via bootstrap resampling (n_resamples=1000, seed per reproducibility policy)"
+  multi_seed_robustness: "Any future champion-selection decision must report results across >=3 random seeds before being treated as robust, not a single run."
+
+class_imbalance_policy_by_dataset_task:
+  # Step 25 -- technique chosen per dataset/task from actual class-count evidence, not blindly.
+  egyptian_tweets_corpus_40k_sentiment:
+    class_counts: {negative: 20000, positive: 20000}
+    policy: NONE
+    rationale: "Balanced 1:1; no imbalance handling needed."
+  astd_sentiment:
+    policy: CLASS_WEIGHTING
+    rationale: "4-class with objective/neutral typically far smaller than pos/neg in ASTD; exact counts to be confirmed at reaudit, but weighting is a safe deterministic default pending that count."
+  arsas_sentiment:
+    class_counts: {Negative: 7384, Neutral: 6894, Positive: 4400, Mixed: 1219}
+    policy: CLASS_WEIGHTING
+    rationale: "~6:1 ratio between largest (Negative) and smallest (Mixed) class; inverse-frequency class weighting is a standard, deterministic, non-resampling response appropriate for text classification."
+  arsas_speech_act:
+    class_counts: {Expression: 11060, Assertion: 7799, Question: 707, Request: 171, Recommendation: 102, Miscellaneous: 58}
+    policy: CLASS_WEIGHTING
+    rationale: "~190:1 ratio between largest (Expression) and smallest (Miscellaneous) class. THRESHOLD_TUNING may additionally be considered post-hoc for the rarest classes once a baseline exists; RESAMPLING (e.g. SMOTE) is explicitly NOT used on raw/embedded text per Step 25's prohibition."
+  mpold_offensive:
+    class_counts: {Non-Offensive: 3325, Offensive: 675}
+    policy: CLASS_WEIGHTING
+    rationale: "5:1 ratio; class weighting preferred over resampling for the same reason as above."
+  amazon_appliances_rating:
+    policy: THRESHOLD_TUNING
+    rationale: "Star-rating distributions in e-commerce reviews are typically right-skewed toward 5 stars; deferred to per-experiment evidence at data-loading time, but resampling of raw review text is not used by default."
+  labr_rating:
+    policy: THRESHOLD_TUNING
+    rationale: "Same rationale as Amazon; LABR's 'balanced' splits (2class-balanced, 5class-balanced files) already provide a pre-balanced alternative that should be preferred over resampling raw text."
+  explicit_prohibition: "SMOTE or any embedding-space oversampling technique is not used on raw or embedded text for any task in this contract."

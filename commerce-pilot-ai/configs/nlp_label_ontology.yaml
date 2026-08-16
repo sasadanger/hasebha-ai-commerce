@@ -1,0 +1,175 @@
+schema_version: nlp-label-ontology-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+purpose: >
+  Represents every active dataset's labels in their source-native form and
+  states, per label, how (or whether) it may be compared across datasets.
+  No universal positive/neutral/negative scheme is imposed here.
+
+labels:
+  - dataset_id: egyptian_tweets_corpus_40k
+    source_label: positive
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_POSITIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+  - dataset_id: egyptian_tweets_corpus_40k
+    source_label: negative
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_NEGATIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+
+  - dataset_id: astd
+    source_label: pos
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_POSITIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+  - dataset_id: astd
+    source_label: neg
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_NEGATIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+  - dataset_id: astd
+    source_label: neutral
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_NEUTRAL
+    mapping_strength: MODERATE
+    mapping_type: PARTIAL
+    allowed_for_cross_dataset_comparison: false
+    note: "Egyptian Tweets 40K has no neutral class; comparing ASTD-neutral predictions against a binary-only model is not meaningful without excluding this class first."
+  - dataset_id: astd
+    source_label: objective
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_OBJECTIVE_NONE
+    mapping_strength: WEAK
+    mapping_type: NON_EQUIVALENT
+    allowed_for_cross_dataset_comparison: false
+    note: "'Objective' (no sentiment expressed) is not equivalent to 'neutral' (sentiment expressed but balanced); conflating them would misrepresent both datasets."
+
+  - dataset_id: arsas
+    source_label: Positive
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_POSITIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+  - dataset_id: arsas
+    source_label: Negative
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_NEGATIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+  - dataset_id: arsas
+    source_label: Neutral
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_NEUTRAL
+    mapping_strength: MODERATE
+    mapping_type: PARTIAL
+    allowed_for_cross_dataset_comparison: false
+  - dataset_id: arsas
+    source_label: Mixed
+    task: SENTIMENT
+    canonical_concept: SENTIMENT_MIXED
+    mapping_strength: WEAK
+    mapping_type: NON_EQUIVALENT
+    allowed_for_cross_dataset_comparison: false
+    note: "No other active sentiment dataset has a 'mixed' class; this label has no counterpart to compare against."
+
+  - dataset_id: arsas
+    source_label: Assertion
+    task: SPEECH_ACT
+    canonical_concept: SPEECH_ACT_ASSERTION
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+    note: "No other active dataset has speech-act labels at all; comparison is moot, not merely disallowed."
+  - dataset_id: arsas
+    source_label: Expression
+    task: SPEECH_ACT
+    canonical_concept: SPEECH_ACT_EXPRESSION
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+  - dataset_id: arsas
+    source_label: Question
+    task: SPEECH_ACT
+    canonical_concept: SPEECH_ACT_QUESTION
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+  - dataset_id: arsas
+    source_label: Request
+    task: SPEECH_ACT
+    canonical_concept: SPEECH_ACT_REQUEST
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+  - dataset_id: arsas
+    source_label: Recommendation
+    task: SPEECH_ACT
+    canonical_concept: SPEECH_ACT_RECOMMENDATION
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+  - dataset_id: arsas
+    source_label: Miscellaneous
+    task: SPEECH_ACT
+    canonical_concept: SPEECH_ACT_OTHER
+    mapping_strength: WEAK
+    mapping_type: NO_MAPPING
+    allowed_for_cross_dataset_comparison: false
+
+  - dataset_id: mpold
+    source_label: Non-Offensive
+    task: OFFENSIVE_LANGUAGE_SAFETY
+    canonical_concept: SAFETY_NON_OFFENSIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+    note: "FORBIDDEN to compare against/map to any SENTIMENT_* concept -- offensive-language annotation and sentiment polarity are different pragmatic dimensions."
+  - dataset_id: mpold
+    source_label: Offensive
+    task: OFFENSIVE_LANGUAGE_SAFETY
+    canonical_concept: SAFETY_OFFENSIVE
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: false
+
+  - dataset_id: amazon_appliances
+    source_label: "1-5 star rating"
+    task: REVIEW_RATING
+    canonical_concept: REVIEW_RATING_ORDINAL
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+    note: "Comparable to LABR's rating scale in structure (both 1-5 ordinal), but NOT comparable in language/domain/market -- structural comparability does not imply substantive comparability."
+  - dataset_id: labr
+    source_label: "1-5 star rating"
+    task: REVIEW_RATING
+    canonical_concept: REVIEW_RATING_ORDINAL
+    mapping_strength: STRONG
+    mapping_type: EXACT
+    allowed_for_cross_dataset_comparison: true
+
+  - dataset_id: adab_politeness
+    source_label: "polite / impolite / neutral (per paper; BLOCKED_BY_DATA, not yet obtained)"
+    task: POLITENESS
+    canonical_concept: PRAGMATIC_POLITENESS
+    mapping_strength: UNKNOWN_PENDING_ACQUISITION
+    mapping_type: NO_MAPPING
+    allowed_for_cross_dataset_comparison: false
+    note: "Politeness must never be treated as a proxy for sentiment or for complaint intent once acquired."
+
+explicit_prohibition: >
+  No universal positive/neutral/negative scheme may be imposed across
+  datasets by any future implementation without amending this file first.
+  mapping_type=NON_EQUIVALENT or NO_MAPPING entries are hard blocks on
+  cross-dataset label comparison, not soft suggestions.

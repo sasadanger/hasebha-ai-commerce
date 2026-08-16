@@ -1,0 +1,34 @@
+/dist
+.env
+.DS_Store
+/uploads
+/node_modules
+yarn-error.log
+
+.idea
+
+coverage
+
+!src/**
+
+# One-off local diagnostic/repair scripts written during development
+# (hardcoded order/product/region IDs specific to this local database,
+# and one contains a local-only demo password). Not part of the
+# application; kept locally, not published. The official Medusa seed
+# script (initial-data-seed.ts) is intentionally kept and tracked.
+src/migration-scripts/*
+!src/migration-scripts/initial-data-seed.ts
+
+./tsconfig.tsbuildinfo
+medusa-db.sql
+build
+.cache
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+.medusa

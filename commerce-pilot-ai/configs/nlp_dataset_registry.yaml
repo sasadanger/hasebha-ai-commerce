@@ -1,0 +1,1546 @@
+schema_version: nlp-dataset-registry-v1
+created_utc: '2026-08-09T00:00:00+00:00'
+authorization_scope: NLP_DATASET_PROVENANCE_ACQUISITION_AND_QUALITY_AUDIT_ONLY
+note: No dataset in this registry is approved for NLP model training, embedding generation, or fine-tuning
+  by virtue of appearing here. approval_status governs research-use eligibility only; commercial_use_status
+  is tracked separately per governing instructions.
+evidence_hierarchy:
+  LEVEL_1: Official dataset owner/publisher page or repository.
+  LEVEL_2: Original academic publication + author-controlled source.
+  LEVEL_3: Trusted research repository (institutional repository, Harvard Dataverse, LDC, ACL-Anthology-linked
+    artifact).
+  LEVEL_4: High-quality maintained mirror with provenance back to original source.
+  LEVEL_5: Kaggle/Hugging Face/community mirror without independently established origin.
+  LEVEL_6: Blog/tutorial/random re-upload.
+dataset_count: 20
+datasets:
+- aliases:
+  - Amazon Appliances
+  version: Amazon Reviews 2023
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Amazon marketplace
+  country_scope: United States (global marketplace)
+  egypt_specific: false
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: true
+  contains_code_switching: false
+  labels:
+  - rating (1-5, observed, not sentiment-labeled)
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 2128605
+  sample_count_verified: 2128605
+  class_distribution:
+    rating_1: 250453
+    rating_2: 79664
+    rating_3: 104047
+    rating_4: 208216
+    rating_5: 1486225
+  collection_period: 2000-10-23 to 2023-09-12 (derived UTC timestamp range, observed)
+  collection_method: Amazon platform review export, McAuley Lab aggregation
+  raw_source_platform: Amazon.com
+  text_type: product review title + body
+  timestamps_available: true
+  user_ids_available: true
+  product_ids_available: true
+  order_ids_available: false
+  rating_available: true
+  pii_risk: MEDIUM (pseudonymous user_id, free text may contain incidental personal narrative)
+  copyright_risk: MEDIUM (user-generated review text, platform ToS applies)
+  license_reported: Not stated on verified project page
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_1
+  download_status: ALREADY_LOCAL_PRIOR_ACQUISITION
+  local_quarantine_path: data/raw/amazon_reviews_appliances/ (pre-existing approved acquisition, not quarantine
+    -- see docs/data_provenance.md)
+  archive_sha256: 150f209befceaa6f837abc997065b2d251034bbbda19bebc4ad56dac779730c2
+  extracted_hash_manifest: {}
+  schema_status: VERIFIED_THIS_SESSION
+  quality_audit_status: PERFORMED_THIS_SESSION
+  duplicate_status: 287,718 exact-duplicate text rows (13.5%) out of 2,128,605 (independently measured
+    this session); 22,657 duplicate rows on the (user_id,parent_asin,timestamp,rating,text) composite
+    key (previously measured, docs/amazon_appliances_data_understanding.md)
+  language_audit_status: 'PERFORMED_THIS_SESSION: 5,000-row sample, 0.00% contains Arabic-script characters,
+    99.72% contains Latin characters -- confirms English-only, no Arabic content.'
+  recommended_role:
+  - ENGLISH_ECOMMERCE_BENCHMARK
+  - MULTIPLATFORM_ROBUSTNESS_BENCHMARK
+  approval_status: APPROVED_FOR_BENCHMARK_ONLY
+  rejection_or_quarantine_reason: null
+  evidence_sources:
+  - docs/amazon_appliances_data_understanding.md
+  - docs/amazon_reviews_voice_of_customer_readiness.md
+  - docs/data_provenance.md
+  - direct local schema/hash re-verification this session
+  review_notes: 'Pre-existing project asset (Phase 1A), not newly acquired this session. Confirmed independently:
+    hash matches provenance record, schema unchanged, English-only. Does NOT prove Egyptian-market, Arabic,
+    or code-switch capability -- explicitly preserved as PRESERVED_NOT_CURRENTLY_EXECUTED per governing
+    prompt.'
+  tier: TIER_A_CORE
+  further_search_justified: false
+  dataset_id: amazon_appliances
+  canonical_name: Amazon Reviews 2023 -- Appliances
+  primary_source_url: https://amazon-reviews-2023.github.io/main.html
+  original_publisher: McAuley Lab, UC San Diego
+  original_authors: McAuley Lab (Hou et al.)
+  publication_year: 2023
+  domain: e-commerce product reviews (Appliances category)
+  commerce_relevance: HIGH
+  languages:
+  - English
+  dialects:
+  - N/A
+  tasks:
+  - sentiment (unlabeled, ratings only)
+  - review-text methodology baseline
+- aliases:
+  - LABR
+  version: master (GitHub, accessed 2026-08-09)
+  secondary_source_urls:
+  - https://aclanthology.org/P13-2088/
+  - https://arxiv.org/abs/1411.6718
+  - https://huggingface.co/datasets/labr
+  doi: null
+  repository_url: https://github.com/mohamedadaly/LABR
+  dataset_card_url: null
+  download_url: https://raw.githubusercontent.com/mohamedadaly/LABR/master/data/reviews.tsv
+  platforms:
+  - Goodreads
+  country_scope: Pan-Arab (Goodreads Arabic reviews, not Egypt-specific)
+  egypt_specific: false
+  contains_egyptian_arabic: UNCONFIRMED (mixed dialect + MSA, not annotated by dialect)
+  contains_msa: true
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - rating (1-5)
+  label_definitions:
+    rating: Goodreads star rating given by the reviewer, 1 (worst) to 5 (best)
+  annotation_method: user-generated star rating (not third-party annotated)
+  annotator_information: unspecified
+  sample_count_reported: 63257
+  sample_count_verified: 63257
+  class_distribution:
+    rating_1: 2939
+    rating_2: 5285
+    rating_3: 12201
+    rating_4: 19054
+    rating_5: 23778
+  collection_period: March 2013 (per original paper)
+  collection_method: Goodreads scrape by original authors
+  raw_source_platform: Goodreads
+  text_type: book review text
+  timestamps_available: false
+  user_ids_available: true
+  product_ids_available: true
+  order_ids_available: false
+  rating_available: true
+  pii_risk: LOW-MEDIUM (pseudonymous Goodreads user_id; free text may contain incidental personal opinion,
+    not typically PII)
+  copyright_risk: MEDIUM (user-generated review text scraped from Goodreads; Goodreads ToS not independently
+    reviewed)
+  license_reported: GNU GPLv2 (confirmed by direct fetch of repository LICENSE file this session)
+  license_verified: true
+  commercial_use_status: REVIEW_REQUIRED (GPLv2 permits use but imposes copyleft/share-alike obligations
+    on derivative works; not a simple commercial-clear license)
+  redistribution_status: Permitted under GPLv2 terms (share-alike)
+  provenance_status: VERIFIED_LEVEL_2
+  download_status: DOWNLOADED_THIS_SESSION
+  local_quarantine_path: data/quarantine/nlp/labr/
+  archive_sha256: null
+  extracted_hash_manifest:
+    reviews.tsv: a72f1b8ece766c918dfdb3c31c2a2da4f408dd2f69a24aef5187c85f313edb04
+    LICENSE: a45d0bb572ed792ed34627a72621834b3ba92aab6e2cc4e04301dee7a728d753
+    README.md: f63756521d31344cb6e93acf6fabab6d71958e9505ceae6282b21557982108d3
+    2class-balanced-train.txt: a33aa8501dec779d6a160f32971e185623b91cfca944c2efb5f1a34c473d4172
+    2class-balanced-test.txt: 02b47e23d0187d229b91f3da9f92c4df11c6e174aa9db88a209cb3aaae062df0
+    5class-balanced-train.txt: 389473fb7e673f60b42d0a8f1c6478f0930a61ae0a069f7b83c6ea670fe8171d
+    5class-balanced-test.txt: 0ca1ef7d5c286514defe6d45d1d72696bfdd169364b0d69d1f02beb9fbfe89cf
+  schema_status: VERIFIED_THIS_SESSION (rating, review_id, user_id, book_id, text)
+  quality_audit_status: PERFORMED_THIS_SESSION
+  duplicate_status: 3,167 exact-duplicate text rows out of 63,257 (5.0%), independently measured this
+    session
+  language_audit_status: 'PERFORMED_THIS_SESSION: 100.00% of text contains Arabic-script characters, 0.00%
+    Latin, in full-corpus scan.'
+  recommended_role:
+  - ARABIC_REVIEW_BENCHMARK
+  approval_status: APPROVED_FOR_FUTURE_RESEARCH_EXPERIMENT
+  rejection_or_quarantine_reason: null
+  evidence_sources:
+  - https://github.com/mohamedadaly/LABR (fetched directly)
+  - https://aclanthology.org/P13-2088/
+  - direct download+hash this session
+  review_notes: Real data downloaded and independently verified this session (63,257 rows matches the
+    widely-cited ~63,000 figure). General Arabic, NOT Egyptian-specific -- must not be relabeled Egyptian
+    per governing instructions. Strong provenance (author's own GitHub, clear GPLv2 license from LICENSE
+    file).
+  tier: TIER_B_SUPPORTING
+  further_search_justified: false
+  dataset_id: labr
+  canonical_name: 'LABR: Large-Scale Arabic Book Reviews Dataset'
+  original_publisher: Mohamed Aly, Amir Atiya (Cairo University)
+  original_authors: Mohamed Aly, Amir Atiya
+  publication_year: 2013
+  primary_source_url: https://github.com/mohamedadaly/LABR
+  domain: book reviews (general product-review methodology transfer only, not e-commerce/delivery)
+  commerce_relevance: MEDIUM (review-sentiment methodology transfers; domain is books, not e-commerce/logistics)
+  languages:
+  - Arabic
+  dialects:
+  - Mixed MSA and various dialects, not individually labeled
+  tasks:
+  - sentiment (1-5 star rating as proxy)
+- aliases:
+  - ASTD
+  version: master (GitHub, accessed 2026-08-09)
+  secondary_source_urls:
+  - https://aclanthology.org/D15-1299/
+  doi: null
+  repository_url: https://github.com/mahmoudnabil/ASTD
+  dataset_card_url: null
+  download_url: https://raw.githubusercontent.com/mahmoudnabil/ASTD/master/data/Tweets.txt
+  platforms:
+  - Twitter/X
+  country_scope: UNCONFIRMED_LIKELY_EGYPTIAN_POLITICAL (see notes)
+  egypt_specific: UNCONFIRMED (author affiliation Egyptian; sampled tweet content references Egyptian
+    political parties/figures; paper does not explicitly claim Egypt-only geo-filtering)
+  contains_egyptian_arabic: LIKELY (unconfirmed by explicit dialect annotation)
+  contains_msa: true
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - OBJ
+  - POS
+  - NEG
+  - NEUTRAL
+  label_definitions:
+    OBJ: objective/non-subjective
+    POS: subjective positive
+    NEG: subjective negative
+    NEUTRAL: subjective mixed/neutral
+  annotation_method: manual annotation by original authors
+  annotator_information: not detailed in available sources
+  sample_count_reported: 10006
+  sample_count_verified: 9694
+  class_distribution:
+    OBJ: 6470
+    NEG: 1642
+    NEUTRAL: 805
+    POS: 777
+  collection_period: pre-2015 (exact window not stated in available sources)
+  collection_method: Twitter API collection by original authors
+  raw_source_platform: Twitter/X
+  text_type: tweet text
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: LOW-MEDIUM (public tweet text, no user IDs retained in released file; mentions/hashtags present
+    at 49.3% of rows)
+  copyright_risk: MEDIUM (tweet text subject to X/Twitter ToS, not independently reviewed)
+  license_reported: GNU GPLv2 (confirmed by direct fetch of repository LICENSE file this session -- corrects
+    an earlier secondary-source claim of 'no license stated')
+  license_verified: true
+  commercial_use_status: REVIEW_REQUIRED (GPLv2 copyleft obligations)
+  redistribution_status: Permitted under GPLv2 terms
+  provenance_status: VERIFIED_LEVEL_2
+  download_status: DOWNLOADED_THIS_SESSION
+  local_quarantine_path: data/quarantine/nlp/astd/
+  archive_sha256: null
+  extracted_hash_manifest:
+    data_Tweets.txt: 616de26a4e420d98611e16a2c4b61be6b83fd6e6951a8a4985da565871506e04
+    LICENSE: a45d0bb572ed792ed34627a72621834b3ba92aab6e2cc4e04301dee7a728d753
+    README.md: 469a8656bfb7887f309e7232b334e9e316b5d52340bcdf51c51a0696f5fa6267
+    data_4class-balanced-train.txt: 7d9db91fb331ccc76837da42a66976988598accb093b3a14b17ebe8446982d45
+    data_4class-balanced-test.txt: 419dbe78dbdc57fd96ec01aab2db229f94ffe46dbf6dd8fb93d300e848f65ea1
+  schema_status: 'VERIFIED_THIS_SESSION (tab-separated: text, label)'
+  quality_audit_status: PERFORMED_THIS_SESSION
+  duplicate_status: 4 exact-duplicate text rows out of 9,694 (0.04%), independently measured this session
+  language_audit_status: 'PERFORMED_THIS_SESSION: 100.00% Arabic-script, 0.22% also contains Latin characters,
+    49.31% contains hashtags -- consistent with Twitter/political-hashtag content.'
+  recommended_role:
+  - EGYPTIAN_SOCIAL_SENTIMENT_BENCHMARK (tentative -- Egypt-specificity not fully confirmed)
+  approval_status: APPROVED_FOR_FUTURE_RESEARCH_EXPERIMENT
+  rejection_or_quarantine_reason: null
+  evidence_sources:
+  - https://github.com/mahmoudnabil/ASTD (fetched directly)
+  - https://aclanthology.org/D15-1299/
+  - direct download+hash this session
+  review_notes: Verified row count (9,694) is slightly below the commonly-cited 10,006 -- likely minor
+    TSV-parsing loss (malformed lines skipped), not a data-integrity concern; documented rather than silently
+    reconciled. Four-class label scheme confirmed directly from data, correcting an earlier three-class
+    secondary-source summary.
+  tier: TIER_B_SUPPORTING
+  further_search_justified: false
+  dataset_id: astd
+  canonical_name: 'ASTD: Arabic Sentiment Tweets Dataset'
+  original_publisher: Mahmoud Nabil, Mohamed Aly, Amir Atiya (Cairo University)
+  original_authors: Mahmoud Nabil, Mohamed Aly, Amir Atiya
+  publication_year: 2015
+  primary_source_url: https://github.com/mahmoudnabil/ASTD
+  domain: general political/social Twitter sentiment (not e-commerce)
+  commerce_relevance: LOW (methodology transfer only; content is general/political, not commerce)
+  languages:
+  - Arabic
+  dialects:
+  - Not explicitly annotated; sample inspection suggests Egyptian/MSA mix
+  tasks:
+  - sentiment classification
+- aliases:
+  - MPOLD
+  - Arabic-Offensive-Multi-Platform-SocialMedia-Comment-Dataset
+  version: master (GitHub, accessed 2026-08-09)
+  secondary_source_urls:
+  - https://aclanthology.org/2020.lrec-1.761.pdf
+  doi: null
+  repository_url: https://github.com/shammur/Arabic-Offensive-Multi-Platform-SocialMedia-Comment-Dataset
+  dataset_card_url: null
+  download_url: https://raw.githubusercontent.com/shammur/Arabic-Offensive-Multi-Platform-SocialMedia-Comment-Dataset/master/data/Arabic_offensive_comment_detection_annotation_4000_selected.xlsx
+  platforms:
+  - Twitter
+  - Facebook
+  - YouTube
+  country_scope: Pan-Arab news comments (not Egypt-specific)
+  egypt_specific: false
+  contains_egyptian_arabic: UNCONFIRMED (multi-dialect Arabic news comments)
+  contains_msa: true
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - Non-Offensive
+  - 'Offensive (subtypes: HS=hate speech, V=vulgar, other)'
+  label_definitions:
+    Non-Offensive: comment not flagged
+    Offensive: flagged offensive; HS=hate speech, V=vulgar-not-hate, other=offensive unspecified
+  annotation_method: manual expert annotation
+  annotator_information: expert annotators; error rows flagged separately in source file
+  sample_count_reported: 4000
+  sample_count_verified: NOT_YET_COUNTED (xlsx schema inspection deferred -- openpyxl not installed in
+    project environment; file downloaded and hashed)
+  class_distribution:
+    reported_offensive_pct: 16.88% (675/4000) per secondary-source description; not independently recounted
+      this session
+  collection_period: not stated in available sources
+  collection_method: news-site comment scraping (Twitter/Facebook/YouTube comment sections on news posts)
+  raw_source_platform: Twitter, Facebook, YouTube (comments on news posts)
+  text_type: social-media comment on news content
+  timestamps_available: UNKNOWN (not inspected -- xlsx parsing deferred)
+  user_ids_available: UNKNOWN
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: MEDIUM (public social comments on news, potential for identifiable opinion/political content)
+  copyright_risk: MEDIUM (comment text originates from third-party platform posts; repository-level license
+    may not necessarily extend full rights over redistribution of that third-party text)
+  license_reported: Apache License 2.0 (confirmed by direct fetch of repository LICENSE file this session)
+  license_verified: true
+  commercial_use_status: LIKELY_ALLOWED_REVIEW_REQUIRED (Apache 2.0 is permissive at the repository level,
+    but underlying comment text originates from third-party social posts whose own platform terms are
+    not independently verified -- code license vs. underlying content rights must be distinguished)
+  redistribution_status: Repository-level permitted under Apache 2.0; underlying third-party text rights
+    unverified
+  provenance_status: VERIFIED_LEVEL_2
+  download_status: DOWNLOADED_THIS_SESSION
+  local_quarantine_path: data/quarantine/nlp/mpold/
+  archive_sha256: null
+  extracted_hash_manifest:
+    Arabic_offensive_comment_detection_annotation_4000_selected.xlsx: 5d23b0865cec1a2e5c86715e32540edb9d68fd896dc318db26925ad62832409d
+    LICENSE: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+    README.md: 0d7339c427fda2202b1bdf223666558ca38c970598f6dcc624417e853be17218
+  schema_status: FILE_DOWNLOADED_SCHEMA_INSPECTION_DEFERRED (xlsx format; openpyxl dependency not installed,
+    not added without separate authorization)
+  quality_audit_status: DEFERRED (see schema_status)
+  duplicate_status: NOT_MEASURED (deferred)
+  language_audit_status: NOT_PERFORMED (deferred)
+  recommended_role:
+  - SAFETY_TOXICITY_BENCHMARK
+  - MULTIPLATFORM_ROBUSTNESS_BENCHMARK
+  approval_status: APPROVED_FOR_BENCHMARK_ONLY
+  rejection_or_quarantine_reason: Not customer-sentiment data; must not be mislabeled as complaint/sentiment
+    benchmark. Content-level audit deferred pending an explicitly authorized environment dependency addition.
+  evidence_sources:
+  - https://github.com/shammur/Arabic-Offensive-Multi-Platform-SocialMedia-Comment-Dataset (fetched directly)
+  - https://aclanthology.org/2020.lrec-1.761.pdf
+  - direct download+hash this session
+  review_notes: Explicitly NOT mislabeled as customer sentiment data per governing instructions -- this
+    is a safety/offensive-language benchmark. Full content audit requires openpyxl; file is safely quarantined
+    and hashed regardless.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: false
+  dataset_id: mpold
+  canonical_name: Multi-Platform Arabic Offensive Language Dataset (news comments)
+  original_publisher: Qatar Computing Research Institute (QCRI)
+  original_authors: Shammur Absar Chowdhury, Hamdy Mubarak, Ahmed Abdelali, Soon-gyo Jung, Bernard J.
+    Jansen, Joni Salminen
+  publication_year: 2020
+  primary_source_url: https://github.com/shammur/Arabic-Offensive-Multi-Platform-SocialMedia-Comment-Dataset
+  domain: offensive-language/safety, NOT customer sentiment
+  commerce_relevance: LOW
+  languages:
+  - Arabic
+  dialects:
+  - Multi-dialect, not individually broken out by country in available sources
+  tasks:
+  - offensive language detection
+  - hate speech detection
+- aliases:
+  - Egyptian Tweets 40K
+  - Arabic Egyptian Corpus
+  version: '2019'
+  secondary_source_urls: []
+  doi: 10.7910/DVN/LBXV9O
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Twitter/X
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: true
+  contains_msa: PARTIAL_UNCONFIRMED
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - positive
+  - negative
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 40000
+  sample_count_verified: null
+  class_distribution:
+    positive: 20000
+    negative: 20000
+  collection_period: pre-2019
+  collection_method: Twitter collection by original authors
+  raw_source_platform: Twitter/X
+  text_type: tweet text
+  timestamps_available: UNKNOWN
+  user_ids_available: UNKNOWN
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN (not inspected)
+  copyright_risk: MEDIUM (tweet text)
+  license_reported: UNKNOWN (Harvard Dataverse page could not be rendered by available fetch tooling)
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_3 (Harvard Dataverse DOI is a trusted institutional repository; DOI
+    existence and authorship independently corroborated across multiple secondary sources)
+  download_status: PRIMARY_SOURCE_ACCESS_BLOCKED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role:
+  - EGYPTIAN_SOCIAL_SENTIMENT_BENCHMARK
+  - EGYPTIAN_EXTERNAL_VALIDATION_CANDIDATE (tentative)
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: Harvard Dataverse page is JavaScript-rendered and could not be retrieved
+    by available WebFetch tooling (same technical barrier encountered researching Olist/Kaggle in the
+    prior gate). Not downloaded via an unverified mirror per policy.
+  evidence_sources:
+  - https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/LBXV9O (DOI verified via
+    search, page content inaccessible)
+  - multiple independent secondary-source corroborations
+  review_notes: 'High-priority recovery target for a future targeted-source-recovery gate: DOI is solid
+    (LEVEL_3), only the page rendering is the blocker. A direct Dataverse API call (not attempted this
+    session, out of caution) may succeed where browser-style WebFetch failed.'
+  tier: TIER_B_SUPPORTING
+  further_search_justified: true
+  dataset_id: egyptian_tweets_corpus_40k
+  canonical_name: Corpus on Arabic Egyptian Tweets (40K)
+  original_publisher: Harvard Dataverse (deposited by authors)
+  original_authors: Rania Kora, Ammar Mohammed
+  publication_year: 2019
+  primary_source_url: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/LBXV9O
+  domain: general-topic Twitter sentiment (not e-commerce-specific; 'blend of different general topics')
+  commerce_relevance: LOW-MEDIUM (general sentiment methodology transfer; not commerce-focused)
+  languages:
+  - Arabic
+  dialects:
+  - Egyptian Arabic
+  tasks:
+  - sentiment classification
+- aliases:
+  - Egyptian Tweets 10K
+  - AEC2
+  version: '2023'
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Twitter/X
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: true
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - positive
+  - negative
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 10000
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_2 (peer-reviewed journal citation confirmed across independent sources)
+  download_status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: No direct data repository or download link located this session; only
+    the citing publication was found.
+  evidence_sources:
+  - Kora & Mohammed 2023, Social Network Analysis and Mining 13(1):38 (citation confirmed via search)
+  review_notes: Confirmed to be a SEPARATE dataset from the 40K corpus per publication metadata (different
+    paper, different year), NOT assumed to be a subset/revision. Exact overlap with the 40K corpus was
+    NOT measured (no data obtained for either). Do not assume combined N=50K.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: true
+  dataset_id: egyptian_tweets_corpus_10k_aec2
+  canonical_name: Arabic Egyptian Corpus 2 (AEC2, 10K)
+  original_publisher: Springer (Social Network Analysis and Mining)
+  original_authors: Rania Kora, Ammar Mohammed
+  publication_year: 2023
+  primary_source_url: 'Kora, R., Mohammed, A.: An enhanced approach for sentiment analysis based on meta-ensemble
+    deep learning. Social Network Analysis and Mining 13(1), 38 (2023).'
+  domain: general-topic Twitter sentiment
+  commerce_relevance: LOW-MEDIUM
+  languages:
+  - Arabic
+  dialects:
+  - Egyptian Arabic
+  tasks:
+  - sentiment classification
+- aliases:
+  - ArSAS
+  version: '2018'
+  secondary_source_urls:
+  - https://www.research.ed.ac.uk/en/publications/an-arabic-speech-act-and-sentiment-corpus-of-tweets/
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Twitter/X
+  country_scope: Pan-Arab (not Egypt-specific)
+  egypt_specific: false
+  contains_egyptian_arabic: UNCONFIRMED (multi-topic/multi-dialect)
+  contains_msa: true
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - 4 sentiment classes
+  - 6 speech-act classes (expression, assertion, question, etc.)
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 21952
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_2 (LREC/ELRA peer-reviewed publication)
+  download_status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: No direct small-file download link independently verified this session;
+    a Hugging Face mirror was referenced in early search results but not independently confirmed or fetched.
+  evidence_sources:
+  - http://www.lrec-conf.org/workshops/lrec2018/W30/pdf/22_W30.pdf
+  - University of Edinburgh Research Explorer listing
+  review_notes: Do NOT overstate Egyptian specificity -- this corpus is general Arabic, multi-topic, multi-dialect
+    per available sources, not confirmed Egypt-focused.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: true
+  dataset_id: arsas
+  canonical_name: 'ArSAS: Arabic Speech-Act and Sentiment Corpus of Tweets'
+  original_publisher: LREC 2018 / ELRA
+  original_authors: AbdelRahim A. Elmadany, Hamdy Mubarak, Walid Magdy
+  publication_year: 2018
+  primary_source_url: http://www.lrec-conf.org/workshops/lrec2018/W30/pdf/22_W30.pdf
+  domain: general Twitter sentiment + speech-act (not e-commerce)
+  commerce_relevance: LOW
+  languages:
+  - Arabic
+  dialects:
+  - Not confirmed Egypt-specific; general Arabic Twitter
+  tasks:
+  - sentiment classification
+  - speech-act classification
+- aliases:
+  - EESA
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: unspecified
+  egypt_specific: false
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: NOT_ESTABLISHED
+  download_status: DATASET_NOT_IDENTIFIED_UNDER_THIS_NAME
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: DATA_NOT_PUBLICLY_AVAILABLE
+  rejection_or_quarantine_reason: No dataset matching this exact name/description (Egyptian Arabic-English
+    YouTube code-switch sentiment corpus) was located via primary-source search this session, despite
+    dedicated queries.
+  evidence_sources:
+  - dedicated WebSearch queries this session, no match found
+  review_notes: Per governing instructions, an unrelated corpus is NOT substituted under this dataset_id.
+    See the separately-logged 'arzen_code_switch_speech_corpus' entry below for a genuinely verified,
+    related-but-distinct Egyptian Arabic-English code-switch resource discovered during this search.
+  tier: REJECT
+  further_search_justified: true
+  dataset_id: eesa_named_dataset
+  canonical_name: EESA (Egyptian Arabic-English YouTube/code-switch sentiment dataset, as named in the
+    governing prompt)
+- aliases:
+  - ArzEn
+  - ArzEn-ST
+  version: 2020 (ArzEn); extended by ArzEn-ST
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Spontaneous interview speech
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: true
+  contains_msa: false
+  contains_english: true
+  contains_code_switching: true
+  labels:
+  - transcription, sentence-segmented
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 12 hours of speech, 38 bilingual speakers
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: informal interviews with Egyptian bilingual university students and employees
+  raw_source_platform: researcher-collected spontaneous speech
+  text_type: transcribed speech
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_3 (ACL Anthology-linked LREC publication)
+  download_status: ACCESS_PENDING
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: Speech corpus (audio); not attempted for acquisition this session, which
+    prioritized text datasets. Distribution channel (LDC-style vs. direct download) not yet confirmed.
+  evidence_sources:
+  - https://aclanthology.org/2020.lrec-1.523/
+  - ResearchGate secondary listing
+  review_notes: Newly discovered this session as a genuine, well-documented Egyptian Arabic-English code-switch
+    resource. NOT used as a substitute for the unidentified 'EESA' dataset -- logged under its own correct
+    name and identity.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: true
+  dataset_id: arzen_code_switch_speech_corpus
+  canonical_name: 'ArzEn: A Speech Corpus for Code-switched Egyptian Arabic-English'
+  original_publisher: LREC 2020 / ELRA (ACL Anthology)
+  original_authors: Injy Hamed, Ngoc Thang Vu, Slim Abdennadher (and ArzEn-ST extension authors)
+  publication_year: 2020
+  primary_source_url: https://aclanthology.org/2020.lrec-1.523/
+  domain: general spontaneous speech (ASR/linguistic research, not e-commerce/customer-service specifically)
+  commerce_relevance: LOW-MEDIUM (code-switching methodology highly relevant; content itself is general
+    interview speech)
+  languages:
+  - Egyptian Arabic
+  - English (code-switched)
+  dialects:
+  - Egyptian Arabic
+  tasks:
+  - ASR
+  - code-switching linguistic analysis
+- aliases:
+  - Egyptian Companies Reviews
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: unspecified
+  egypt_specific: false
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: NOT_ESTABLISHED
+  download_status: PROVENANCE_VERIFIED_DATA_NOT_RECOVERED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: DATA_NOT_PUBLICLY_AVAILABLE
+  rejection_or_quarantine_reason: No academic publication describing exactly 40,045 samples across 12
+    Egyptian companies from Twitter+Google Play was located this session. A superficially similarly-themed
+    GitHub student project (zahran1234/EgyptionCompaniesReviews_Sentiment_analysis) was found but does
+    NOT state a matching sample count, company count, license, or citation, and cannot be confirmed as
+    the same dataset -- per governing instructions, it is NOT treated as a verified match on filename/topic
+    similarity alone.
+  evidence_sources:
+  - https://github.com/zahran1234/EgyptionCompaniesReviews_Sentiment_analysis (inspected, does not confirm
+    claimed scale/provenance)
+  review_notes: Provenance-recovery investigation performed as instructed; recovery unsuccessful this
+    session. Remains a named future recovery target.
+  tier: QUARANTINE
+  further_search_justified: true
+  dataset_id: egyptian_companies_reviews
+  canonical_name: 'Egyptian Companies Reviews (as described in the governing prompt: ~40,045 samples,
+    12 companies, Twitter + Google Play)'
+- aliases:
+  - EmotionalTone
+  version: 2018 (CICLing 2017 proceedings)
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Twitter/X
+  country_scope: Egypt (geo-filtered)
+  egypt_specific: true
+  contains_egyptian_arabic: true
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - joy
+  - anger
+  - sympathy
+  - sadness
+  - fear
+  - surprise
+  - love
+  - none
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 10000
+  sample_count_verified: null
+  class_distribution:
+    surprise_min: 1045
+    none_max: 1550
+  collection_period: July-August 2016
+  collection_method: Twitter, 'Olympics' hashtags, Egypt geo-filtered
+  raw_source_platform: Twitter/X
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_2 (peer-reviewed conference chapter)
+  download_status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: No direct data repository link located this session.
+  evidence_sources:
+  - https://link.springer.com/chapter/10.1007/978-3-319-77116-8_8
+  - PMC/Frontiers secondary corroboration
+  review_notes: Genuinely Egypt-specific and genuinely emotion-labeled, but topic (2016 Olympics) has
+    low relevance to e-commerce/customer-service; useful primarily for Egyptian-dialect emotion-methodology
+    transfer, not domain content.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: true
+  dataset_id: emotionaltone_egyptian
+  canonical_name: Emotional Tone Detection in Arabic Tweets (EmotionalTone)
+  original_publisher: Springer (CICLing)
+  original_authors: Amr Al-Khatib, Samhaa R. El-Beltagy
+  publication_year: 2018
+  primary_source_url: https://link.springer.com/chapter/10.1007/978-3-319-77116-8_8
+  domain: general emotion (Olympics-hashtag topic, not e-commerce)
+  commerce_relevance: 'LOW (topic mismatch: sports/Olympics content, not commerce)'
+  languages:
+  - Arabic
+  dialects:
+  - Egyptian Arabic
+  tasks:
+  - emotion classification
+- aliases:
+  - Arabic Feedback Corpus
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: unspecified
+  egypt_specific: false
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: NOT_ESTABLISHED
+  download_status: DATASET_NOT_IDENTIFIED_UNDER_THIS_NAME
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: DATA_NOT_PUBLICLY_AVAILABLE
+  rejection_or_quarantine_reason: No single named academic dataset matching this description was located
+    this session.
+  evidence_sources:
+  - dedicated WebSearch queries this session
+  review_notes: A related, separately-logged discovery (Arabic food-delivery-services sentiment research,
+    PeerJ/PMC) is recorded under its own identity below rather than substituted under this name.
+  tier: REJECT
+  further_search_justified: true
+  dataset_id: arabic_feedback_corpus_logistics_candidate
+  canonical_name: Arabic Feedback Corpus / Egyptian logistics feedback candidate (as described in the
+    governing prompt)
+- aliases: []
+  version: 2023/2024
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - food delivery review platforms (exact platform not confirmed)
+  country_scope: Arabic-speaking region (not confirmed Egypt-specific)
+  egypt_specific: UNCONFIRMED
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_2_3 (peer-reviewed, PeerJ/PMC)
+  download_status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: Public dataset availability not confirmed; only the research paper was
+    located this session.
+  evidence_sources:
+  - https://peerj.com/articles/cs-2669/
+  - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11888876/
+  review_notes: High domain relevance (delivery/logistics complaints, the exact gap CommercePilot needs)
+    but dataset public-release status unconfirmed. Priority target for next-gate recovery.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: true
+  dataset_id: arabic_food_delivery_sentiment_research
+  canonical_name: Arabic Sentiment Analysis of Food Delivery Services Reviews (research)
+  original_publisher: ResearchGate/PeerJ/PMC listing
+  publication_year: 2023
+  primary_source_url: https://peerj.com/articles/cs-2669/
+  domain: food delivery service reviews -- directly relevant logistics/delivery complaint domain
+  commerce_relevance: HIGH (delivery/logistics domain match)
+  languages:
+  - Arabic
+  tasks:
+  - sentiment classification
+- aliases:
+  - ADAB
+  version: LREC 2026 / arXiv 2602.13870
+  secondary_source_urls:
+  - https://aclanthology.org/2026.lrec-1.244/
+  - https://huggingface.co/datasets/gagan3012/adab (THIRD-PARTY MIRROR, provenance to official authors
+    NOT independently confirmed)
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - social media
+  - e-commerce
+  - customer service
+  - a fourth unspecified platform
+  country_scope: Pan-Arab (Gulf, Egyptian, Levantine, Maghrebi dialects + MSA)
+  egypt_specific: PARTIAL (one of four dialect groups covered, exact Egyptian proportion not stated in
+    available sources)
+  contains_egyptian_arabic: true
+  contains_msa: true
+  contains_english: false
+  contains_code_switching: UNCONFIRMED
+  labels:
+  - polite
+  - impolite
+  - neutral
+  - 16 finer politeness categories
+  label_definitions:
+    polite/impolite/neutral: primary 3-class politeness label
+    16 categories: finer-grained linguistic politeness feature annotations, per Arabic pragmatic theory
+  annotation_method: manual annotation grounded in Arabic linguistic/pragmatic theory
+  annotator_information: substantial inter-annotator agreement, kappa=0.703
+  sample_count_reported: 10000
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: not stated in available excerpt
+  collection_method: unspecified
+  raw_source_platform: 4 online platforms (social media, e-commerce, customer service, +1 unspecified)
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: Creative Commons Attribution 4.0 (CC BY 4.0) -- confirmed directly from the arXiv
+    paper page this session
+  license_verified: true
+  commercial_use_status: LIKELY_ALLOWED_REVIEW_REQUIRED (CC BY 4.0 permits commercial use with attribution;
+    standard due-diligence review still recommended before integration)
+  redistribution_status: Permitted under CC BY 4.0 with attribution
+  provenance_status: VERIFIED_LEVEL_1_2 (arXiv preprint + LREC 2026 acceptance; lead author is an established
+    Arabic-NLP researcher)
+  download_status: MIRROR_FOUND_PROVENANCE_UNCONFIRMED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: Only download location found (huggingface.co/datasets/gagan3012/adab)
+    is an unofficial-looking third-party account, not confirmed to be author-controlled or an authorized
+    mirror. Per governing instructions, a LEVEL_5/6 mirror is not used to substitute for primary-source
+    confirmation. NOT downloaded this session pending confirmation of an official release channel.
+  evidence_sources:
+  - https://arxiv.org/abs/2602.13870 (fetched directly)
+  - https://aclanthology.org/2026.lrec-1.244/
+  - huggingface.co/datasets/gagan3012/adab (found, not used as authoritative)
+  review_notes: 'HIGHEST-PRIORITY new discovery this session: recent (2026), clear CC BY 4.0 license verified
+    from the primary paper, explicit e-commerce/customer-service domain coverage, includes Egyptian dialect,
+    credible institutional authorship. Strongly recommended as the lead target for the next targeted-source-recovery
+    gate to locate the official release channel before acquisition.'
+  tier: TIER_A_CORE
+  further_search_justified: true
+  dataset_id: adab_politeness
+  canonical_name: 'ADAB: Arabic Dataset for Automated Politeness Benchmarking'
+  original_publisher: LREC 2026 (arXiv preprint)
+  original_authors: Hend Al-Khalifa and 7 co-authors
+  publication_year: 2026
+  primary_source_url: https://arxiv.org/abs/2602.13870
+  domain: politeness classification across social media, e-commerce, and customer-service text -- directly
+    relevant domain match
+  commerce_relevance: HIGH (explicit e-commerce and customer-service platform coverage)
+  languages:
+  - Arabic
+  dialects:
+  - MSA
+  - Gulf
+  - Egyptian
+  - Levantine
+  - Maghrebi
+  tasks:
+  - politeness classification
+- aliases:
+  - HARD
+  version: '2018'
+  secondary_source_urls:
+  - https://huggingface.co/datasets/Elnagara/hard
+  - https://link.springer.com/chapter/10.1007/978-3-319-67056-0_3
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Booking.com
+  country_scope: Pan-Arab hotel reviews (not Egypt-specific)
+  egypt_specific: false
+  contains_egyptian_arabic: false
+  contains_msa: true
+  contains_english: false
+  contains_code_switching: false
+  labels:
+  - rating (1-5)
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 93,700 (balanced) -- CONTRADICTORY figures found for the full/unbalanced set
+    (373,750 vs 490,587 reported across different secondary sources)
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: June-July 2016
+  collection_method: scraped from Booking.com by original authors
+  raw_source_platform: Booking.com
+  text_type: hotel review text
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: NO_LICENSE_FOUND (no LICENSE file or statement located in the repository this session)
+  license_verified: false
+  commercial_use_status: PROHIBITED_PENDING_REVIEW (no repo license found; underlying content originates
+    from Booking.com, a commercial travel platform whose own ToS govern review-content rights and were
+    not reviewed this session)
+  redistribution_status: UNVERIFIED
+  provenance_status: VERIFIED_LEVEL_2 (author's own GitHub + peer-reviewed book chapter)
+  download_status: NOT_ATTEMPTED_THIS_SESSION
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: QUARANTINE_LICENSE
+  rejection_or_quarantine_reason: No repository license found; source-platform (Booking.com) terms not
+    reviewed; conflicting sample-count figures across sources not reconciled. Held in quarantine pending
+    a dedicated license/rights review, consistent with governing instructions for HARD specifically.
+  evidence_sources:
+  - https://github.com/elnagara/HARD-Arabic-Dataset (fetched directly)
+  - https://link.springer.com/chapter/10.1007/978-3-319-67056-0_3
+  review_notes: 'Exactly the code-license-vs-source-platform-terms distinction the governing prompt warned
+    about: no code license was even found, and Booking.com''s own terms remain a separate, unreviewed
+    risk.'
+  tier: QUARANTINE
+  further_search_justified: false
+  dataset_id: hard_hotel_reviews
+  canonical_name: 'HARD: Hotel Arabic-Reviews Dataset'
+  original_publisher: Springer (Elnagar, Khalifa, Einea 2018)
+  original_authors: Ashraf Elnagar, Yasmin S. Khalifa, Anas Einea
+  publication_year: 2018
+  primary_source_url: https://github.com/elnagara/HARD-Arabic-Dataset
+  domain: hotel reviews -- general review-sentiment methodology, not e-commerce/delivery
+  commerce_relevance: MEDIUM (review-sentiment methodology transfers; domain is hospitality, not e-commerce)
+  languages:
+  - Arabic
+  dialects:
+  - MSA and dialectal Arabic, mixed
+  tasks:
+  - sentiment classification
+- aliases: []
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: unspecified
+  egypt_specific: false
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: NOT_ESTABLISHED
+  download_status: PAPER_NOT_LOCATED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: DATA_NOT_PUBLICLY_AVAILABLE
+  rejection_or_quarantine_reason: Dedicated search for a paper describing exactly ~323,150 Egyptian e-commerce
+    reviews found no match. No paper, author, institution, or repository could be identified this session.
+  evidence_sources:
+  - dedicated WebSearch query this session, no match found
+  review_notes: Search was comprehensive (multiple phrasing variants of the reported count) but unsuccessful.
+    A genuinely promising alternative Egyptian e-commerce dataset (Jumia Egypt Reviews Dataset) was discovered
+    instead and is logged separately below.
+  tier: REJECT
+  further_search_justified: true
+  dataset_id: egyptian_ecommerce_323k_corpus
+  canonical_name: ~323,150-sample Egyptian e-commerce customer review corpus (as described in the governing
+    prompt)
+- aliases:
+  - JERD
+  version: Kaggle upload, last updated ~10 months prior to access
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms:
+  - Jumia (real Egyptian/African e-commerce marketplace)
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: unknown exact row count; file reported as 229 KB single CSV
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN (Kaggle dataset page could not be rendered by available WebFetch tooling)
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_5 (individual Kaggle uploader; collection/scraping methodology not
+    documented; no confirmed link to Jumia itself)
+  download_status: PRIMARY_SOURCE_ACCESS_BLOCKED
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: QUARANTINE_PROVENANCE
+  rejection_or_quarantine_reason: Small and topically ideal (real Egyptian e-commerce marketplace), but
+    provenance is an unverified individual Kaggle upload with no documented collection methodology, and
+    Kaggle's page could not be rendered by available tooling to check the stated license (same JavaScript-rendering
+    barrier encountered throughout this and the prior Olist AS-OF gate).
+  evidence_sources:
+  - Kaggle search listing (page content itself inaccessible)
+  review_notes: Genuinely promising discovery given the domain/country match and small safe size (229
+    KB), but provenance quality is the lowest tier (LEVEL_5) found among promising candidates this session.
+    Worth a targeted Kaggle-API-based recovery attempt (rather than browser-style WebFetch) in a future
+    session.
+  tier: QUARANTINE
+  further_search_justified: true
+  dataset_id: jumia_egypt_reviews_jerd
+  canonical_name: Jumia Egypt Reviews Dataset (JERD)
+  original_publisher: Kaggle user aliallam13 (NOT Jumia itself; unofficial third-party upload)
+  primary_source_url: https://www.kaggle.com/datasets/aliallam13/jumia-egypt-reviews
+  domain: e-commerce product reviews -- direct domain and country match
+  commerce_relevance: HIGH
+  languages:
+  - multilingual (Arabic and/or English -- not independently confirmed)
+  tasks:
+  - sentiment/rating analysis
+- aliases: []
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_5_6 (student project, methodology and sourcing not independently documented)
+  download_status: NOT_ATTEMPTED_THIS_SESSION
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: QUARANTINE_PROVENANCE
+  rejection_or_quarantine_reason: Purpose (dialect term/translation identification) does not match CommercePilot's
+    sentiment/complaint/e-commerce needs; provenance is an unverified student project.
+  evidence_sources:
+  - GitHub repository description (fetched via search, not independently verified in depth)
+  review_notes: Logged for completeness as a newly discovered large Egyptian-dialect resource; low near-term
+    priority given domain mismatch.
+  tier: REJECT
+  further_search_justified: false
+  dataset_id: egyptian_2_5m_dialect_collection
+  canonical_name: 2.5+ Million Rows Egyptian Datasets Collection (dialect/translation corpus)
+  original_publisher: Individual GitHub/Kaggle user (Mostafanofal453), Master's graduation project
+  primary_source_url: https://github.com/Mostafanofal453/2.5-Million-Rows-Egyptian-Datasets-Collection
+  domain: Egyptian-dialect term/translation corpus -- NOT sentiment or e-commerce specific
+  commerce_relevance: LOW
+  languages:
+  - Egyptian Arabic
+- aliases:
+  - FutureBeeAI Egyptian Arabic datasets
+  - Macgence Egyptian Arabic datasets
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: null
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: COMMERCIAL_PAID_LICENSE (not a free/open dataset)
+  license_verified: false
+  commercial_use_status: LIKELY_ALLOWED_REVIEW_REQUIRED (contingent on commercial licensing agreement
+    with vendor; not evaluated here)
+  redistribution_status: UNKNOWN
+  provenance_status: VENDOR_ADVERTISED_NOT_INDEPENDENTLY_AUDITED
+  download_status: NOT_ATTEMPTED_COMMERCIAL_PAID
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: Paid commercial data vendor products, not free/open research datasets.
+    Not acquired or evaluated in depth this session -- out of scope for a research-data provenance gate.
+    Logged as a legitimate future paid-acquisition path for the Egyptian first-party data gap.
+  evidence_sources:
+  - https://www.futurebeeai.com/dataset/speech-dataset/retail-call-center-conversation-arabic-egypt
+  - https://data.macgence.com/dataset/egyptian-arabic-general-conversation-customer-speech-dataset
+  review_notes: 'Distinct category from research datasets: genuine commercial vendors selling exactly
+    the retail/e-commerce Egyptian-Arabic call-center data CommercePilot eventually needs. Relevant to
+    the Egyptian first-party data gap analysis as a paid-acquisition option, not a free research asset.'
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: false
+  dataset_id: commercial_egyptian_callcenter_vendors
+  canonical_name: Commercial Egyptian Arabic call-center/customer-service speech data vendors (FutureBeeAI,
+    Macgence, and similar)
+  original_publisher: FutureBeeAI; Macgence (commercial data vendors)
+  primary_source_url: https://www.futurebeeai.com/dataset/speech-dataset/retail-call-center-conversation-arabic-egypt
+  domain: retail/e-commerce, telecom, healthcare, travel call-center speech -- strong domain match for
+    customer-service track
+  commerce_relevance: HIGH (retail/e-commerce call-center product specifically advertised)
+  languages:
+  - Egyptian Arabic
+- aliases: []
+  version: unspecified
+  secondary_source_urls: []
+  doi: null
+  repository_url: null
+  dataset_card_url: null
+  download_url: null
+  platforms: []
+  country_scope: Egypt
+  egypt_specific: true
+  contains_egyptian_arabic: false
+  contains_msa: false
+  contains_english: false
+  contains_code_switching: false
+  labels: []
+  label_definitions: {}
+  annotation_method: unspecified
+  annotator_information: unspecified
+  sample_count_reported: 52 phone calls
+  sample_count_verified: null
+  class_distribution: {}
+  collection_period: unspecified
+  collection_method: unspecified
+  raw_source_platform: unspecified
+  text_type: unspecified
+  timestamps_available: false
+  user_ids_available: false
+  product_ids_available: false
+  order_ids_available: false
+  rating_available: false
+  pii_risk: UNKNOWN
+  copyright_risk: UNKNOWN
+  license_reported: UNKNOWN
+  license_verified: false
+  commercial_use_status: UNKNOWN
+  redistribution_status: UNKNOWN
+  provenance_status: VERIFIED_LEVEL_2_3 (academic paper)
+  download_status: ACCESS_PENDING
+  local_quarantine_path: null
+  archive_sha256: null
+  extracted_hash_manifest: {}
+  schema_status: NOT_INSPECTED
+  quality_audit_status: NOT_PERFORMED
+  duplicate_status: NOT_MEASURED
+  language_audit_status: NOT_PERFORMED
+  recommended_role: []
+  approval_status: ACCESS_PENDING
+  rejection_or_quarantine_reason: Small corpus (52 calls), different vertical (banking/airline), public
+    data release not confirmed.
+  evidence_sources:
+  - https://arxiv.org/pdf/1505.04197
+  review_notes: Minor supporting reference for dialogue-act annotation methodology only.
+  tier: TIER_C_RESEARCH_ONLY
+  further_search_justified: false
+  dataset_id: arabic_inquiry_answer_dialogue_acts
+  canonical_name: Arabic Inquiry-Answer Dialogue Acts corpus (Egyptian banks / EgyptAir calls)
+  primary_source_url: https://arxiv.org/pdf/1505.04197
+  domain: banking/airline customer service dialogue acts -- adjacent vertical, not e-commerce
+  commerce_relevance: LOW-MEDIUM (methodology transfer only; different vertical)
+  languages:
+  - Egyptian Arabic

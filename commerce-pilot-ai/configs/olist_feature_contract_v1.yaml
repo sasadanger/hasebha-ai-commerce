@@ -1,0 +1,103 @@
+contract:
+  version: "olist-feature-contract-v1"
+  prediction_point: "confirmed_payment_approval"
+  prediction_timestamp: "order_approved_at"
+
+features:
+  STRICT_CORE_ALLOWED:
+    - purchase_year
+    - purchase_month
+    - purchase_day_of_week
+    - purchase_hour
+    - approval_year
+    - approval_month
+    - approval_day_of_week
+    - approval_hour
+    - purchase_to_approval_seconds
+  CONDITIONALLY_ALLOWED:
+    - payment_record_count
+    - payment_type_indicators
+    - max_payment_installments
+    - total_payment_value
+    - item_count
+    - unique_product_count
+    - unique_seller_count
+    - total_item_price
+    - total_freight_value
+    - mean_freight_value
+    - max_freight_value
+    - product_category_diversity
+    - product_dimension_aggregates
+    - product_weight_aggregates
+    - customer_location
+    - seller_location_aggregates
+    - customer_seller_distance
+    - historical_customer_statistics
+    - historical_seller_statistics
+    - historical_product_statistics
+    - historical_regional_delay_statistics
+  FORBIDDEN:
+    - order_status
+    - shipping_limit_date
+    - order_delivered_carrier_date
+    - review_score
+    - review_comment_title
+    - review_comment_message
+    - review_creation_date
+    - review_answer_timestamp
+    - target_derived_feature
+    - validation_outcome_aggregate
+    - test_outcome_aggregate
+  TARGET_CONSTRUCTION_ONLY:
+    - order_delivered_customer_date
+    - order_estimated_delivery_date
+  IDENTIFIER_ONLY:
+    - order_id
+    - customer_id
+    - customer_unique_id
+    - order_item_id
+    - product_id
+    - seller_id
+    - payment_sequential
+    - customer_zip_code_prefix
+    - seller_zip_code_prefix
+    - geolocation_zip_code_prefix
+    - product_category_name
+  UNRESOLVED:
+    - promised_lead_time
+
+allowed_derived_formulas:
+  purchase_year: "year(order_purchase_timestamp)"
+  purchase_month: "month(order_purchase_timestamp)"
+  purchase_day_of_week: "dayofweek(order_purchase_timestamp)"
+  purchase_hour: "hour(order_purchase_timestamp)"
+  approval_year: "year(order_approved_at)"
+  approval_month: "month(order_approved_at)"
+  approval_day_of_week: "dayofweek(order_approved_at)"
+  approval_hour: "hour(order_approved_at)"
+  purchase_to_approval_seconds: "date_diff('second', order_purchase_timestamp, order_approved_at)"
+
+aggregation_rules:
+  items: "Aggregate by order_id before joining; deterministic count/distinct/sum/mean/max only."
+  payments: "Aggregate by order_id before joining; preserve missing aggregate indicators."
+  products: "Join through unique product_id before order aggregation."
+  sellers: "Join through unique seller_id before order aggregation."
+  geolocation: "Collapse to one deterministic record per ZIP prefix before joining."
+  reviews: "Never join to model inputs."
+
+experiment_variants:
+  strict_offline_core:
+    allowed_tiers: ["STRICT_CORE_ALLOWED"]
+    primary_benchmark: true
+  expanded_snapshot_assumptions:
+    allowed_tiers: ["STRICT_CORE_ALLOWED", "CONDITIONALLY_ALLOWED"]
+    primary_benchmark: false
+    labeling_requirement: "Every result must disclose unverified approval-time snapshot assumptions."
+
+validation_rules:
+  classifications_exhaustive_and_mutually_exclusive: true
+  forbid_target_columns_in_model_inputs: true
+  forbid_review_columns_in_model_inputs: true
+  forbid_post_approval_status_and_shipping_events: true
+  identifiers_not_predictive: true
+  final_test_protected: true

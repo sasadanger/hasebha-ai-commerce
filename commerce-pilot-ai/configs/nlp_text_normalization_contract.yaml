@@ -1,0 +1,89 @@
+schema_version: nlp-text-normalization-contract-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+purpose: >
+  Canonical, deterministic text-normalization specification. Defines two
+  distinct outputs per text: RAW (untouched, for provenance/audit) and
+  NORMALIZED (per this spec, for deduplication and modeling). This contract
+  does not execute any normalization in this gate; it specifies the rule set
+  a future implementation must follow, reproducibly.
+
+unicode_normalization_form: NFC
+  # NFC chosen over NFKC: NFKC silently rewrites Arabic presentation-form
+  # ligatures and compatibility characters, which can alter dialectal spelling
+  # signal. NFC preserves canonical composition without compatibility folding.
+
+whitespace_normalization:
+  rule: "Collapse runs of Unicode whitespace (space, tab, newline, non-breaking space) to a single ASCII space; strip leading/trailing whitespace."
+  applies_to: NORMALIZED only
+
+zero_width_and_invisible_characters:
+  rule: "Strip zero-width space (U+200B), zero-width non-joiner (U+200C), zero-width joiner (U+200D), left-to-right mark (U+200E), right-to-left mark (U+200F), byte-order mark (U+FEFF)."
+  rationale: "Independent review of Egyptian Tweets 40K found these characters present in the raw label column, causing naive exact-match grouping to undercount duplicates/labels. This rule is REQUIRED, not optional, before any dedup or split."
+  applies_to: NORMALIZED only
+
+arabic_diacritics_tashkeel:
+  policy: STRIP_IN_NORMALIZED_PRESERVE_IN_RAW
+  rationale: "Diacritics are sparse and inconsistently applied in social-media Arabic; stripping in NORMALIZED avoids spurious non-duplicates, while RAW preserves them for any future diacritic-sensitive analysis."
+  characters: "U+064B-U+0652, U+0670 (superscript alef), U+06D6-U+06ED (Quranic marks, rare but included for completeness)"
+
+tatweel_kashida:
+  policy: STRIP_IN_NORMALIZED
+  character: "U+0640"
+  rationale: "Elongation character carries no lexical content and is used stylistically; stripping avoids false non-duplicates."
+
+arabic_letter_normalization:
+  policy: APPLY_IN_NORMALIZED_ONLY_DO_NOT_ALTER_RAW
+  rules:
+    - "Alef variants (أ إ آ ٱ) -> bare alef ا"
+    - "Alef maksura ى -> yaa ي is NOT applied by default (dialect-significant in Egyptian Arabic; would erase useful signal). Left unnormalized."
+    - "Taa marbuta ة -> haa ه is NOT applied by default (same rationale)."
+  rationale: >
+    Only alef-variant folding is applied because it is near-universally treated
+    as orthographic noise in Arabic NLP. Alef-maksura/yaa and taa-marbuta/haa
+    folding are explicitly withheld because Egyptian Arabic dialect research
+    depends on preserving genuine spelling variation -- this directly implements
+    the "do NOT over-normalize Egyptian text" requirement.
+
+latin_case_normalization:
+  policy: LOWERCASE_IN_NORMALIZED_ONLY
+  applies_to: "Latin-script tokens only (relevant for ASTD/EESA code-switch content and Amazon English text)"
+
+url_handling:
+  policy: REPLACE_WITH_PLACEHOLDER_TOKEN
+  placeholder: "[URL]"
+  applies_to: NORMALIZED only
+
+mentions_handling:
+  policy: REPLACE_WITH_PLACEHOLDER_TOKEN
+  placeholder: "[MENTION]"
+  applies_to: NORMALIZED only
+  rationale: "Twitter-derived corpora (Egyptian Tweets 40K, ASTD, ArSAS) contain @mentions; replacing avoids treating distinct usernames as meaningful duplicate-breaking content while removing potential PII."
+
+hashtags_handling:
+  policy: STRIP_HASH_SYMBOL_KEEP_TOKEN_TEXT
+  rationale: "Hashtag text often carries sentiment-bearing content (e.g. #بحبها); the symbol alone is stripped, not the word."
+
+emoji_handling:
+  policy: PRESERVE_IN_BOTH_RAW_AND_NORMALIZED
+  rationale: "Emoji are informative for sentiment; no dataset audit found emoji-driven parsing issues, so no removal is warranted."
+
+punctuation_handling:
+  policy: PRESERVE_IN_RAW_COLLAPSE_REPEATED_PUNCTUATION_IN_NORMALIZED
+  rule: "3+ repeated punctuation marks (e.g. '!!!!!') collapse to a single repeated-punctuation marker '[REPEAT_PUNCT]' in NORMALIZED only; RAW is untouched."
+
+digit_handling:
+  policy: PRESERVE_BOTH_ARABIC_INDIC_AND_LATIN_DIGITS_UNCHANGED
+  rationale: "No evidence that digit-script normalization affects any current task; deferred until a task requires it."
+
+linebreak_handling:
+  policy: "Treated as whitespace under whitespace_normalization; RAW preserves original line breaks (critical for correctly parsing quoted multi-line fields, as required for ArSAS's tab-delimited file)."
+
+empty_text_definition:
+  rule: "A row's text field is EMPTY if, after whitespace_normalization and zero-width-character stripping, the resulting string has length 0."
+  rationale: "This is the same effective definition independently used during Phase 2C NLP provenance review to reproduce missing-text counts of 0 for Egyptian Tweets 40K, ArSAS, and MPOLD exactly."
+
+non_goals:
+  - "No stemming or lemmatization is defined here (task-dependent, deferred to a future modeling-specific contract)."
+  - "No stopword removal is defined here (may erase sentiment-bearing negation particles in Arabic; explicitly out of scope for this contract)."
+  - "No transliteration between scripts is defined here."

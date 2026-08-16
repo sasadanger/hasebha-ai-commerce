@@ -1,0 +1,43 @@
+schema_version: nlp-text-normalization-contract-v2
+supersedes_for_future_authorization: configs/nlp_text_normalization_contract.yaml
+authorization_scope: NLP_TRAINING_AUTHORIZATION_REMEDIATION_ONLY
+implementation: src/nlp/text_normalization.py
+
+input_coercion:
+  rule: "None becomes empty string; all other non-byte text-field values use deterministic str(value)."
+
+minimal_empty_text_stage:
+  ordered_steps:
+    - Unicode NFC normalization
+    - "Strip U+200B, U+200C, U+200D, U+200E, U+200F, U+FEFF"
+    - Collapse Unicode whitespace, including line breaks, to one ASCII space
+    - Strip leading and trailing whitespace
+  empty_definition: "EMPTY exactly when the result of this minimal stage has length zero."
+  explicitly_not_removed: [tatweel, Arabic_diacritics, punctuation, emoji, URLs, mentions, hashtag_symbol, hashtag_text, Latin_digits, Arabic_Indic_digits]
+
+normalized_duplicate_stage:
+  ordered_steps:
+    - "Input coercion: None to empty string, otherwise str(value)"
+    - Unicode NFC normalization
+    - "Strip U+200B, U+200C, U+200D, U+200E, U+200F, U+FEFF"
+    - Collapse Unicode whitespace to one ASCII space and trim
+    - Strip tatweel U+0640
+    - "Strip Arabic diacritics U+064B-U+0652, U+0670, U+06D6-U+06ED"
+    - "Fold Arabic alef variants U+0623, U+0625, U+0622, U+0671 to U+0627"
+    - Replace URL spans with literal token "[URL]"
+    - Replace mention spans with literal token "[MENTION]"
+    - "Strip # only when immediately followed by a Unicode word character; preserve token text"
+    - "Replace each run of 3+ identical characters only when its Unicode general category begins with P (punctuation); symbols, emoji, and icons are unchanged"
+    - "Lowercase Unicode characters whose Unicode name contains LATIN and category is Lu or Lt; do not lowercase other scripts"
+    - "Restore contract placeholder literals to uppercase spelling"
+
+preservation_rules:
+  emoji: PRESERVE
+  symbols: PRESERVE
+  unicode_icons: PRESERVE
+  digits: PRESERVE_LATIN_AND_ARABIC_INDIC
+  alef_maksura_to_yaa: FORBIDDEN
+  taa_marbuta_to_haa: FORBIDDEN
+  stemming: FORBIDDEN
+  lemmatization: FORBIDDEN
+  transliteration: FORBIDDEN

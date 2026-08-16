@@ -1,0 +1,119 @@
+# ============================================================
+# HASEBHA | حاسبها — root .gitignore
+# Nested .gitignore files in commerce-pilot-ai/ and
+# medusa-app/commercepilot-medusa/ still apply on top of this one.
+# ============================================================
+
+# Claude/Codex/agent session data — never publish conversation
+# history, prompts, or agent-internal state.
+.claude/
+.codex/
+**/.claude/
+**/.codex/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+credentials*.json
+*token*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+ENV/
+
+# Node / Next.js / Medusa build output
+node_modules/
+.next/
+.turbo/
+.vercel/
+.medusa/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs / runtime
+*.log
+logs/
+
+# Datasets, model artifacts, ML caches — kept locally, documented
+# in README instead of committed (see docs/architecture and README
+# "Artifacts & reproducibility" section). Blanket-excluded (not just
+# data/raw etc.) so any new dataset subdirectory is safe by default --
+# e.g. data/quarantine/ (third-party NLP corpora pending review) was
+# previously uncovered by a narrower rule and had to be added explicitly.
+commerce-pilot-ai/data/**
+artifacts/
+models/
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.cbm
+*.safetensors
+*.bin
+huggingface_cache/
+.cache/huggingface/
+torch_cache/
+
+# Generated reports (large/experiment-volume) — curated public
+# reports are copied into docs/ instead, not the raw generated tree.
+reports/generated/**
+
+# Internal, dated session checkpoints (dozens of directories recording
+# development-session narration, intermediate diagnostics, and
+# occasional local-only demo credentials). Not meant for public
+# publication per project decision — a small set of final, cleaned
+# summaries is hand-copied into docs/ instead. Preserved locally.
+commerce-pilot-ai/reports/checkpoints/**
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+
+# Docker local volumes (named volumes are managed by Docker itself,
+# not files in this tree, but bind-mount data directories are ignored
+# defensively if ever introduced)
+**/pgdata/
+**/redisdata/
+
+# Internal packaging/review artifacts from earlier development sessions,
+# not meant for public publication (kept locally).
+commerce-pilot-ai/PACKAGING_VERIFICATION*.txt
+commerce-pilot-ai/V2_PACKAGE_MANIFEST.json
+commerce-pilot-ai/V2_REVIEW_README.md
+commerce-pilot-ai/V3_PACKAGE_MANIFEST.json
+commerce-pilot-ai/V3_REVIEW_README.md
+
+# NOTE: the migration-scripts exclusion lives in
+# medusa-app/commercepilot-medusa/apps/backend/.gitignore instead of here,
+# because that file has its own "!src/**" re-include rule which takes
+# precedence over a same-purpose rule defined only at this root level.

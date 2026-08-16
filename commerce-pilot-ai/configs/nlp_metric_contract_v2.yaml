@@ -1,0 +1,46 @@
+schema_version: nlp-metric-contract-v2
+supersedes_for_future_authorization: configs/nlp_metric_contract.yaml
+authorization_scope: NLP_TRAINING_AUTHORIZATION_REMEDIATION_ONLY
+
+batch1_experiments:
+  EXPERIMENT_A_english_ecommerce_review_baseline:
+    task_type: FIVE_CLASS_RATING_CLASSIFICATION
+    number_of_classes: 5
+    source_label: overall
+    labels: [1, 2, 3, 4, 5]
+    primary_metric: macro_f1
+    secondary_metrics: [per_class_precision, per_class_recall, per_class_f1, accuracy, balanced_accuracy, confusion_matrix]
+    derived_mapping: NONE
+    allowed_comparisons: [same_dataset_same_split_hash]
+  EXPERIMENT_B2_astd_only:
+    task_type: FOUR_CLASS_SENTIMENT_CLASSIFICATION
+    number_of_classes: 4
+    source_label: label
+    labels: [POS, NEG, NEUTRAL, OBJ]
+    primary_metric: macro_f1
+    secondary_metrics: [per_class_precision, per_class_recall, per_class_f1, accuracy, balanced_accuracy, confusion_matrix]
+    derived_mapping: NONE
+    allowed_comparisons: [same_dataset_same_split_hash]
+  EXPERIMENT_C_arabic_review_domain_robustness:
+    task_type: FIVE_CLASS_RATING_CLASSIFICATION
+    number_of_classes: 5
+    source_label: rating
+    labels: [1, 2, 3, 4, 5]
+    primary_metric: macro_f1
+    secondary_metrics: [per_class_precision, per_class_recall, per_class_f1, accuracy, balanced_accuracy, confusion_matrix]
+    derived_mapping: NONE
+    allowed_comparisons: [same_dataset_same_split_hash]
+  EXPERIMENT_E_multiplatform_safety_robustness:
+    task_type: BINARY_OFFENSIVE_LANGUAGE_CLASSIFICATION
+    number_of_classes: 2
+    source_label: Majority_Label
+    labels: [Non-Offensive, Offensive]
+    primary_metric: macro_f1
+    secondary_metrics: [minority_class_recall, per_class_precision, per_class_recall, per_class_f1, accuracy, balanced_accuracy, confusion_matrix]
+    derived_mapping: NONE
+    allowed_comparisons: [same_dataset_same_split_hash]
+
+cross_experiment_rules:
+  amazon_labr_direct_score_comparison: FORBIDDEN
+  rationale: "They share label cardinality but differ in language, source platform, domain, and dataset construction; scores may be reported side-by-side only as separate pipeline checks, never as a direct model-quality ranking."
+  undefined_class_aggregation_metrics: FORBIDDEN

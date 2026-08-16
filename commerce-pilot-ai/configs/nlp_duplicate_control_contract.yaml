@@ -1,0 +1,72 @@
+schema_version: nlp-duplicate-control-contract-v1
+created_utc: "2026-08-09T00:00:00+00:00"
+authorization_scope: NLP_EXPERIMENT_DEFINITION_ONLY
+purpose: >
+  Canonical, deterministic, reproducible duplicate-detection specification.
+  Created directly in response to independent-review Finding 2
+  (reports/checkpoints/phase2c_nlp_provenance_remediation_independent_review_2026-08-09/):
+  the prior session's duplicate/conflicting-label counts for Egyptian Tweets 40K
+  and ArSAS were close but not bit-exact reproducible because the exact
+  normalization used was not pinned down. This file is that pin. No embedding-
+  based or fuzzy semantic duplicate detection is used or authorized here.
+
+canonical_duplicate_keys:
+  RAW_EXACT_KEY:
+    definition: "The text field's bytes, completely unmodified."
+    use: "Audit/provenance only. Undercounts true duplicates due to whitespace/invisible-character noise (as independent review demonstrated: 323 raw-exact duplicate rows vs. 382 after normalization for Egyptian Tweets 40K)."
+
+  NORMALIZED_EXACT_KEY:
+    definition: "The text field after applying configs/nlp_text_normalization_contract.yaml's NORMALIZED pipeline in full, in this fixed order: (1) Unicode NFC, (2) zero-width/invisible-character stripping, (3) whitespace collapse+strip, (4) tatweel stripping, (5) diacritic stripping, (6) alef-variant folding, (7) URL/mention placeholder substitution, (8) Latin lowercasing."
+    use: "PRIMARY key for exact-duplicate detection and for train/validation/test split isolation. This is the key that must be used to compute duplicate_row_count and cross_split_duplicate checks."
+
+  OPTIONAL_TASK_SPECIFIC_KEY:
+    definition: "NORMALIZED_EXACT_KEY plus task-specific fields, e.g. (NORMALIZED_EXACT_KEY, dataset_id) for cross-dataset overlap checks, or (NORMALIZED_EXACT_KEY, Topic) for ArSAS topic-aware analysis."
+    use: "Optional, per-experiment; must be explicitly named in the experiment manifest entry that uses it."
+
+required_checks_per_future_split:
+  - name: exact_duplicate_rows
+    key: RAW_EXACT_KEY
+    action: RECORD_FOR_AUDIT_ONLY
+
+  - name: normalized_duplicate_rows
+    key: NORMALIZED_EXACT_KEY
+    action: MUST_ISOLATE_BEFORE_SPLIT
+    rule: "All rows sharing a NORMALIZED_EXACT_KEY value must be assigned to the SAME split (never spread across train/validation/test)."
+
+  - name: same_text_same_label
+    key: [NORMALIZED_EXACT_KEY, label_field]
+    action: DEDUPLICATE_KEEP_ONE_PER_GROUP
+    rule: "Within a single dataset, rows with identical (NORMALIZED_EXACT_KEY, label) collapse to one representative row before splitting, to avoid inflating apparent class support."
+
+  - name: same_text_different_label
+    key: NORMALIZED_EXACT_KEY
+    action: SEE_CONFLICTING_LABEL_POLICY
+    rule: "Handled per configs/nlp_split_policy.yaml's conflicting-label policy (Step 8) -- not resolved by this contract alone."
+
+  - name: cross_split_duplicates
+    key: NORMALIZED_EXACT_KEY
+    action: FORBIDDEN
+    rule: "No NORMALIZED_EXACT_KEY value may appear in more than one of {train, validation, test, external_test} for the same experiment."
+
+  - name: cross_dataset_exact_overlap
+    key: NORMALIZED_EXACT_KEY
+    action: RECORD_AND_REVIEW
+    rule: "Before any experiment uses two datasets together (train+external_test, or a merge per the merge_policy), compute the NORMALIZED_EXACT_KEY intersection and record the overlap count and rate. Precedent: reports/generated/nlp/cross_dataset_exact_overlap.json (LABR vs ASTD, overlap=0) established this pattern in the prior gate; it must be extended to every new dataset pair actually used in an experiment."
+
+determinism_requirements:
+  - "The normalization pipeline order is fixed (see NORMALIZED_EXACT_KEY.definition) -- reordering steps changes the key and is not permitted without a new contract version."
+  - "No random sampling, hashing salt, or non-deterministic tie-breaking may be used when selecting which duplicate row is 'kept' -- ties broken by lowest original row index."
+  - "Implementations must be pure functions of (RAW text, this contract version) -- no dependency on run time, machine, or library version beyond what is recorded in the reproducibility policy (Step 24)."
+
+mandatory_reaudits_before_any_future_split:
+  egyptian_tweets_corpus_40k:
+    EGYPTIAN_TWEETS_DUPLICATE_REAUDIT_REQUIRED: true
+    reason: "Reported 379 duplicates / 13 conflicting-label texts not bit-exact reproduced by independent review (323-382 / 11-12 depending on normalization choice)."
+  arsas:
+    ARSAS_DUPLICATE_REAUDIT_REQUIRED: true
+    reason: "Reported 31 conflicting-label texts not bit-exact reproduced by independent review (26 independently recomputed), despite exact-duplicate-row count (99) matching exactly."
+
+explicitly_not_used_in_this_gate:
+  - "Embedding-based near-duplicate detection"
+  - "Fuzzy string similarity (edit distance, MinHash, SimHash, etc.)"
+  - "Any model-derived duplicate score"

@@ -1,0 +1,42 @@
+name: commercepilot-medusa
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: commercepilot_medusa_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa
+      POSTGRES_DB: medusa_store
+    ports:
+      # Distinct from the unrelated oral_ai_postgres container's 5432 mapping
+      # on this machine -- avoids any port collision if that project's stack
+      # is ever restarted.
+      - "5433:5432"
+    volumes:
+      - commercepilot_medusa_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medusa -d medusa_store"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: commercepilot_medusa_redis
+    restart: unless-stopped
+    ports:
+      # Distinct from the unrelated oral_ai_redis container's 6380 mapping.
+      - "6381:6379"
+    volumes:
+      - commercepilot_medusa_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  commercepilot_medusa_pg_data:
+  commercepilot_medusa_redis_data:

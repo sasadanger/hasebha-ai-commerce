@@ -1,0 +1,67 @@
+schema_version: olist-phase2c-target-contract-v1
+status: PLANNING_ONLY
+created_utc: "2026-08-09T00:00:00+00:00"
+source_documents:
+  - docs/olist_future_delivery_risk_spec.md
+  - docs/olist_target_eligibility_policy.md
+  - docs/olist_leakage_assessment.md
+  - docs/modeling_readiness_gate.md
+
+# Phase 2C does not redefine the target. It inherits the frozen Phase 1D/2A/2B
+# target and prediction point unchanged, and adds nothing that was not already
+# documented before this gate.
+
+prediction_target:
+  name: late_delivery
+  definition: "order_delivered_customer_date > order_estimated_delivery_date"
+  unit_of_prediction: one order (olist unique order_id, primary cohort 95,082 orders)
+  label_type: retrospective binary, label-only construction
+  label_availability_timestamp: "order_delivered_customer_date (post-outcome; used only to build the label, never as a feature)"
+  frozen_since: phase1d
+  changed_by_phase2c: false
+
+decision_timestamp:
+  name: order_approved_at
+  description: "confirmed payment approval; frozen prediction point since Phase 1C/1D"
+  alternative_considered: "confirmed shipment/carrier handoff (narrower carrier-stage intervention); not selected as primary"
+  changed_by_phase2c: false
+
+prediction_horizon:
+  description: "from payment approval until customer delivery; exact business-relevant lead time not yet defined pending operations stakeholder input"
+  status: REQUIRES_BUSINESS_INPUT
+
+# The three concepts below are kept explicitly distinct per the Phase 2C gate
+# requirement. Phase 2B/2A produced only the first (a model score); the second
+# and third do not exist yet anywhere in the repository.
+
+prediction_target_vs_action_vs_recommendation:
+  prediction_target:
+    description: "A calibrated probability/score that a given approved order will be delivered later than its recorded estimated delivery date."
+    produced_by: predictive model (locked champion CatBoost strict-core; Expanded-contract status INCONCLUSIVE_INCREMENTAL_SIGNAL)
+  business_action:
+    description: "What an operations reviewer would actually do in response to a risk score (e.g., proactively contact carrier, expedite, flag for manual review)."
+    status: NOT_YET_DEFINED
+    owner_required: operations/fulfillment stakeholder
+  downstream_recommendation:
+    description: "The future Decision Action Card content: risk level, evidence available at the prediction point, suggested operational action, prediction time, confidence, and limitations, per docs/olist_future_delivery_risk_spec.md and docs/project_charter.md."
+    status: NOT_YET_DEFINED
+    contract_owner: "shared Decision Action Card API contract (charter Phase 4), not yet designed"
+
+cost_structure:
+  cost_of_false_positive: UNKNOWN_REQUIRES_BUSINESS_INPUT
+  cost_of_false_negative: UNKNOWN_REQUIRES_BUSINESS_INPUT
+  note: "Per project charter success criteria, numerical targets and costs are established only after data validation and stakeholder baseline review. No cost values are invented in this contract."
+
+likely_business_user: "E-commerce operations and fulfillment teams (per docs/project_charter.md target users)"
+likely_operational_workflow: "Operations reviewer triage of approved orders flagged as elevated delivery risk, per docs/olist_future_delivery_risk_spec.md 'Intended decision'"
+
+forbidden_as_features:
+  - order_delivered_carrier_date
+  - order_delivered_customer_date
+  - order_status (final/current lifecycle value)
+  - any review table field (review_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp) — entire table is post-outcome per docs/olist_asof_feature_contract.md
+  - any post-approval cancellation event
+  - any field whose approval-time value is unverified as immutable (e.g. order_estimated_delivery_date as a feature; label-construction use only)
+
+not_redefined_by_phase2c: true
+not_authorized_to_retrain_by_this_contract: true

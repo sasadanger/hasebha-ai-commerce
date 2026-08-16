@@ -1,0 +1,31 @@
+schema_version: nlp-duplicate-control-contract-v2
+supersedes_for_future_authorization: configs/nlp_duplicate_control_contract.yaml
+authorization_scope: NLP_TRAINING_AUTHORIZATION_REMEDIATION_ONLY
+normalization_contract: configs/nlp_text_normalization_contract_v2.yaml
+implementation: src/nlp/duplicate_control.py
+
+canonical_duplicate_keys:
+  RAW_EXACT_KEY:
+    definition: "UTF-8 bytes of the unmodified caller text-field value; bytes inputs remain byte-identical."
+    use: RECORD_FOR_AUDIT_ONLY
+  NORMALIZED_EXACT_KEY:
+    definition: "Exact string output of normalized_duplicate_stage in configs/nlp_text_normalization_contract_v2.yaml, including hashtag and repeated-punctuation steps in the stated order."
+    use: PRIMARY_SPLIT_ISOLATION_KEY
+
+deterministic_group_definitions:
+  normalized_duplicate_rows: "sum(group_size - 1) over NORMALIZED_EXACT_KEY groups of size > 1"
+  same_label_duplicate_rows: "sum(group_size - 1) over (NORMALIZED_EXACT_KEY, task-native-label) groups of size > 1"
+  conflicting_label_key: "a NORMALIZED_EXACT_KEY group containing more than one distinct task-native label"
+  conflicting_label_rows: "sum(group_size) over conflicting-label keys"
+  unique_normalized_texts: "cardinality of NORMALIZED_EXACT_KEY"
+
+split_requirements:
+  normalization_before_grouping: mandatory
+  conflicting_groups_before_split: mandatory
+  no_key_across_splits: mandatory
+  same_label_action: DEDUPLICATE_KEEP_ONE_PER_GROUP
+  sentiment_conflict_action: REMOVE_CONFLICTING_GROUP_FROM_ALL_SPLITS
+  speech_act_conflict_action: BLOCKED_PENDING_DATASET_SPECIFIC_POLICY
+
+prohibited_matching: [fuzzy_matching, semantic_matching, embeddings, neural_similarity]
+

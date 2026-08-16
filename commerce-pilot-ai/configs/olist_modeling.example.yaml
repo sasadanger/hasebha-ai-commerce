@@ -1,0 +1,71 @@
+experiment:
+  name: "olist_delivery_risk_at_payment_approval"
+  prediction_point: "confirmed_payment_approval"
+  random_seed: 20260803
+  eligibility_policy_version: "olist-eligibility-v1"
+  feature_contract_version: "olist-asof-payment-approval-v1"
+  anomaly_policy_version: "olist-timestamp-anomaly-v1"
+
+target:
+  name: "late_delivery"
+  definition: "order_delivered_customer_date > order_estimated_delivery_date"
+  positive_value: true
+  negative_value: false
+  semantics_status: "VALID_RETROSPECTIVE_PROMISE_BREACH_TARGET_WITH_UNVERIFIED_ASOF_SEMANTICS"
+
+contracts:
+  readiness_resolution: "configs/olist_readiness_resolution.yaml"
+  feature_contract: "configs/olist_feature_contract_v1.yaml"
+
+eligibility_rules_in_order:
+  - "exclude_duplicated_order_ids"
+  - "exclude_non_delivered_status"
+  - "exclude_missing_payment_approval"
+  - "exclude_missing_actual_customer_delivery"
+  - "exclude_missing_estimated_delivery"
+  - "exclude_approval_before_purchase"
+  - "exclude_delivery_before_purchase"
+  - "exclude_estimate_before_approval"
+  - "exclude_carrier_before_approval"
+  - "exclude_delivery_before_carrier"
+
+temporal_split:
+  timestamp_column: "order_approved_at"
+  train:
+    start: "2016-09-01"
+    end_exclusive: "2018-01-01"
+  validation:
+    start: "2018-01-01"
+    end_exclusive: "2018-05-01"
+  test:
+    start: "2018-05-01"
+    end_exclusive: "2018-09-01"
+
+allowed_feature_groups:
+  - "purchase_and_approval_calendar"
+  - "payment_aggregates_available_at_approval"
+  - "order_item_price_and_freight_aggregates_if_snapshot_verified"
+  - "product_and_seller_aggregates_if_snapshot_verified"
+  - "customer_location_at_permitted_granularity"
+  - "training-past-only historical aggregates"
+
+forbidden_feature_groups:
+  - "carrier_handoff_and_delivery_events"
+  - "final_status_and_post_approval_cancellation"
+  - "reviews"
+  - "target-derived_features"
+  - "validation_or_test_outcome_aggregates"
+
+evaluation:
+  primary_metric: "pr_auc"
+  secondary_metrics: ["roc_auc", "recall", "precision", "f1", "confusion_matrix", "brier_score", "calibration_curve", "predicted_risk_distribution", "positive_class_prevalence", "accuracy_descriptive_only"]
+  threshold_selection:
+    dataset: "validation_only"
+    policies: ["maximize_declared_validation_objective", "minimum_recall_requirement_to_be_set_by_stakeholders", "operational_cost_scenarios_with_unverified_costs"]
+
+future_model_candidates: ["DummyClassifier", "LogisticRegression", "CatBoostClassifier", "LGBMClassifier"]
+
+outputs:
+  audit_directory: "reports/generated/olist"
+  future_experiment_directory: "artifacts/experiments/olist"
+  final_test_predictions: "artifacts/experiments/olist/<EXPERIMENT_ID>/test_predictions.parquet"

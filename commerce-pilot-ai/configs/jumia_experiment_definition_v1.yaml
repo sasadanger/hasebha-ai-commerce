@@ -1,0 +1,63 @@
+# Jumia Egypt Reviews (JERD) -- experiment definition, frozen 2026-08-15.
+# Primary task: native 5-class star-rating prediction from review text.
+# NOT collapsed to binary/ternary sentiment (see docs/nlp_rating_mapping_and_reproducibility_policy.md
+# Step 27 -- rating stays REVIEW_RATING, a sentiment-derivation mapping is a
+# separate, not-yet-adopted decision, and this experiment does not adopt it).
+schema_version: jumia-experiment-definition-v1
+frozen_at: "2026-08-15"
+
+dataset:
+  id: jumia_egypt_reviews_jerd
+  source_file: data/raw/jumia/extracted/jumia_reviews.csv
+  source_file_sha256: e5bb88cb063bddfe7ba263d9194e0d72cafe74b49cdac580b52b925d7e19c5c3
+  ingestion_checkpoint: reports/checkpoints/jumia_ingestion_2026-08-15/CURRENT_STATE.md
+  eda_report: reports/generated/jumia/jumia_eda_report.json
+  row_count: 3809
+
+task:
+  task_id: JUMIA_RATING
+  task_type: FIVE_CLASS_RATING_CLASSIFICATION  # reuses the exact conflict-category
+    # mapping already declared for Experiment A/C in src/nlp/split_preparation.py's
+    # TASK_TYPE_TO_CONFLICT_CATEGORY -- FIVE_CLASS_RATING_CLASSIFICATION -> REVIEW_RATING
+  text_key: review
+  label_key: customer_rating
+  labels: ["1", "2", "3", "4", "5"]
+  label_type: native_star_rating
+  not_collapsed_to_sentiment: true
+
+preprocessing:
+  normalization_contract: nlp-text-normalization-contract-v2
+  normalization_impl: src.nlp.text_normalization.normalize_text
+  duplicate_key_impl: src.nlp.duplicate_control.normalized_exact_key
+  note: >
+    Reuses the exact same normalize_text function already used for LABR/ASTD/
+    MPOLD preprocessing and for the FastAPI ai_service's NLP inference adapter
+    -- not a new/parallel normalization implementation.
+
+split:
+  policy_source: configs/nlp_split_policy.yaml (schema nlp-split-policy-v2)
+  duplicate_contract_source: configs/nlp_duplicate_control_contract_v2.yaml (schema nlp-duplicate-control-contract-v2)
+  conflict_category: REVIEW_RATING
+  conflict_action: KEEP_IN_TRAIN_ONLY_WITH_FLAG  # resolved from the active
+    # split policy as-is; not a new decision made for Jumia -- REVIEW_RATING's
+    # policy already covers this task type identically to Experiment A/C.
+  same_label_action: DEDUPLICATE_KEEP_ONE_PER_GROUP
+  grouping_key: NORMALIZED_EXACT_KEY (normalized `review` text)
+  train_pct: 70
+  validation_pct: 15
+  test_pct: 15
+  data_split_seed: 20260809  # the project's canonical DATA_SPLIT_SEED per
+    # docs/nlp_rating_mapping_and_reproducibility_policy.md Step 24 ("fixed,
+    # per configs/nlp_split_policy.yaml, unless a documented reason requires
+    # a different seed"). No such reason exists for Jumia -- reused as-is
+    # for full cross-dataset consistency, not re-derived per-dataset.
+  min_class_count_for_stratification: 30
+  product_level_grouping: NOT_ENFORCED  # see split-policy checkpoint for the
+    # empirical justification (duplicate-text groups are not product-local;
+    # enforcing product grouping in addition to duplicate-group isolation
+    # risks large transitive-closure cascades given how many distinct SKUs
+    # share generic short review phrases)
+
+evidence_boundary:
+  internal_test_access: NOT_YET_OPENED
+  protected_test_gate: reports/checkpoints/jumia_phase9_freeze_and_protected_test (to be created in Phase 9)

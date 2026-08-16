@@ -1,0 +1,64 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment and local configuration files
+.env
+.env.*
+!.env.example
+configs/datasets.yaml
+configs/datasets.local.yaml
+configs/*.local.yaml
+*.pem
+*.key
+credentials*.json
+
+# Dataset contents (keep directory structure)
+data/raw/**
+data/processed/**
+data/external/**
+data/profiles/**
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+
+# Logs
+*.log
+logs/
+reports/generated/**
+
+# Model artifacts
+models/
+artifacts/
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.pt
+*.pth
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db

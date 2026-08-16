@@ -1,0 +1,623 @@
+schema_version: nlp-dataset-registry-v2
+created_utc: '2026-08-09T13:58:46.882150+00:00'
+authorization_scope: NLP_DATA_PROVENANCE_REMEDIATION_AND_TARGETED_RECOVERY_ONLY
+scientific_authorization: DEFERRED_TO_INDEPENDENT_REVIEW
+valid_portfolio_tiers:
+- ACTIVE_TIER_A_CORE
+- ACTIVE_TIER_B_SUPPORTING
+- ACTIVE_TIER_C_RESEARCH_ONLY
+- TARGET_TIER_A_PENDING_ACQUISITION
+- TARGET_TIER_B_PENDING_ACQUISITION
+- QUARANTINE
+- ACCESS_PENDING
+- DATA_NOT_PUBLICLY_AVAILABLE
+- REJECTED
+dataset_count: 20
+datasets:
+- dataset_id: amazon_appliances
+  canonical_name: Amazon Reviews 2023 — Appliances
+  portfolio_tier: ACTIVE_TIER_A_CORE
+  status: PRESERVED
+  files_obtained: true
+  verified_n: 2128605
+  language: English
+  egypt_specific: NOT_PROVEN
+  platform: Amazon marketplace
+  commerce_relevance: HIGH
+  task: overall/review methodology
+  physical_fields: [rating, title, text]
+  canonical_nlp_fields: [overall, review_title, review_text]
+  physical_to_canonical_adapter: src/nlp/amazon_adapter.py#adapt_amazon_record
+  data_license: UNKNOWN
+  paper_license: N/A
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: UNKNOWN
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: ENGLISH_ECOMMERCE_PRODUCT_REVIEW_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'YES'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: APPROVED_FOR_BENCHMARK_ONLY
+  previous_tier: TIER_A_CORE
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - docs/amazon_appliances_data_understanding.md
+  - docs/amazon_reviews_voice_of_customer_readiness.md
+  - docs/data_provenance.md
+  - direct local schema/hash re-verification this session
+- dataset_id: labr
+  canonical_name: LABR
+  portfolio_tier: ACTIVE_TIER_B_SUPPORTING
+  status: ACTIVE_RESEARCH_ONLY
+  files_obtained: true
+  verified_n: 63257
+  language: Arabic
+  egypt_specific: NOT_PROVEN
+  platform: Goodreads
+  commerce_relevance: MEDIUM
+  task: ratings/review sentiment
+  data_license: UNRESOLVED_SOURCE_TEXT_RIGHTS
+  paper_license: N/A
+  code_license: GNU GPLv2 (confirmed by direct fetch of repository LICENSE file this
+    session)
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: LOW_MEDIUM
+  final_role: ARABIC_GENERAL_REVIEW_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'YES'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: APPROVED_FOR_FUTURE_RESEARCH_EXPERIMENT
+  previous_tier: TIER_B_SUPPORTING
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://github.com/mohamedadaly/LABR (fetched directly)
+  - https://aclanthology.org/P13-2088/
+  - direct download+hash this session
+- dataset_id: astd
+  canonical_name: ASTD
+  portfolio_tier: ACTIVE_TIER_B_SUPPORTING
+  status: ACTIVE_RESEARCH_ONLY
+  files_obtained: true
+  verified_n: 9694
+  language: Arabic
+  egypt_specific: PROVEN
+  platform: Twitter/X
+  commerce_relevance: LOW
+  task: sentiment
+  data_license: UNRESOLVED_TWEET_RIGHTS
+  paper_license: N/A
+  code_license: GNU GPLv2 (confirmed by direct fetch of repository LICENSE file this
+    session -- corrects an earlier secondary-source claim of 'no license stated')
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: EGYPTIAN_SOCIAL_SENTIMENT_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'YES'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: APPROVED_FOR_FUTURE_RESEARCH_EXPERIMENT
+  previous_tier: TIER_B_SUPPORTING
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://github.com/mahmoudnabil/ASTD (fetched directly)
+  - https://aclanthology.org/D15-1299/
+  - direct download+hash this session
+- dataset_id: mpold
+  canonical_name: MPOLD
+  portfolio_tier: ACTIVE_TIER_C_RESEARCH_ONLY
+  status: ACTIVE_RESEARCH_ONLY
+  files_obtained: true
+  verified_n: 4000
+  language: Arabic/mixed script
+  egypt_specific: NOT_PROVEN
+  platform: Twitter/Facebook/YouTube
+  commerce_relevance: LOW
+  task: offensive language
+  data_license: APACHE_2_SCOPE_REPOSITORY_DATA_SCOPE_REVIEW_REQUIRED
+  paper_license: N/A
+  code_license: Apache License 2.0 (confirmed by direct fetch of repository LICENSE
+    file this session)
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: REVIEW_REQUIRED
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: ARABIC_MULTIPLATFORM_SAFETY_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'YES'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: APPROVED_FOR_BENCHMARK_ONLY
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://github.com/shammur/Arabic-Offensive-Multi-Platform-SocialMedia-Comment-Dataset
+    (fetched directly)
+  - https://aclanthology.org/2020.lrec-1.761.pdf
+  - direct download+hash this session
+- dataset_id: egyptian_tweets_corpus_40k
+  canonical_name: Corpus on Arabic Egyptian Tweets
+  portfolio_tier: ACTIVE_TIER_B_SUPPORTING
+  status: ACTIVE_RESEARCH_ONLY
+  files_obtained: true
+  verified_n: 40000
+  language: Egyptian Arabic
+  egypt_specific: PROVEN
+  platform: Twitter/X-derived corpus
+  commerce_relevance: LOW
+  task: binary sentiment
+  data_license: CC0-1.0_OFFICIAL_DATAVERSE
+  paper_license: N/A
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: RESEARCH_READY_COMMERCIAL_PLATFORM_RIGHTS_REVIEW
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: EGYPTIAN_SOCIAL_SENTIMENT_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'YES'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_B_SUPPORTING
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://doi.org/10.7910/DVN/LBXV9O
+  - data/quarantine/nlp/egyptian_tweets_40k/dataverse_metadata.json
+- dataset_id: arsas
+  canonical_name: ArSAS
+  portfolio_tier: ACTIVE_TIER_C_RESEARCH_ONLY
+  status: ACTIVE_RESEARCH_ONLY
+  files_obtained: true
+  verified_n: 19897
+  language: Mixed Arabic varieties
+  egypt_specific: NOT_PROVEN
+  platform: Twitter/X
+  commerce_relevance: LOW
+  task: sentiment and speech act
+  data_license: NOT_STATED
+  paper_license: N/A
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'YES'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://homepages.inf.ed.ac.uk/wmagdy/resources.htm
+  - https://www.pure.ed.ac.uk/ws/portalfiles/portal/54743525/arabic_speech_act.pdf
+- dataset_id: adab_politeness
+  canonical_name: ADAB
+  portfolio_tier: ACCESS_PENDING
+  status: GATED_DATASET_NOT_OBTAINED
+  files_obtained: false
+  verified_n: 10000
+  language: MSA and multiple dialects
+  egypt_specific: PROVEN
+  platform: social/e-commerce/customer service (four platforms)
+  commerce_relevance: HIGH
+  task: politeness
+  data_license: HF_CARD_CC_BY_4_DATA_FILES_GATED
+  paper_license: CC_BY_4.0_ELRA_PAPER
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: DEFERRED_RIGHTS_REVIEW
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: POLITENESS_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_A_CORE
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://aclanthology.org/2026.lrec-main.244/
+  - https://huggingface.co/datasets/IWAN/adab-arabic-politeness
+- dataset_id: eesa_named_dataset
+  canonical_name: EESA
+  portfolio_tier: TARGET_TIER_A_PENDING_ACQUISITION
+  status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  files_obtained: false
+  verified_n: 4100
+  language: Egyptian Arabic-English code-switch
+  egypt_specific: PROVEN
+  platform: YouTube comments
+  commerce_relevance: MEDIUM
+  task: sentiment
+  data_license: NOT_FOUND
+  paper_license: COPYRIGHT_SPRINGER_PAPER
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: EGYPTIAN_CODE_SWITCH_SENTIMENT_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: DATA_NOT_PUBLICLY_AVAILABLE
+  previous_tier: REJECT
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://doi.org/10.1007/978-3-031-78014-1_5
+  - https://dblp.org/rec/conf/specom/SherifS24
+- dataset_id: egyptian_tweets_corpus_10k_aec2
+  canonical_name: Arabic Egyptian Corpus 2
+  portfolio_tier: TARGET_TIER_B_PENDING_ACQUISITION
+  status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  files_obtained: false
+  verified_n: 10000
+  language: Egyptian colloquial Arabic
+  egypt_specific: PROVEN
+  platform: Twitter/X
+  commerce_relevance: LOW
+  task: binary sentiment
+  data_license: NOT_FOUND
+  paper_license: SPRINGER_ARTICLE_RIGHTS
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: EGYPTIAN_SOCIAL_SENTIMENT_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://doi.org/10.1007/s13278-023-01043-6
+- dataset_id: egyptian_companies_reviews
+  canonical_name: Egyptian Companies Reviews
+  portfolio_tier: TARGET_TIER_A_PENDING_ACQUISITION
+  status: PROVENANCE_VERIFIED_DATA_NOT_RECOVERED
+  files_obtained: false
+  verified_n: 40045
+  language: Egyptian Arabic
+  egypt_specific: PROVEN
+  platform: Twitter/X and Google Play
+  commerce_relevance: HIGH
+  task: sentiment
+  data_license: NOT_FOUND
+  paper_license: PAPER_RIGHTS_UNKNOWN
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: EGYPTIAN_COMPANY_CUSTOMER_FEEDBACK_BENCHMARK
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: DATA_NOT_PUBLICLY_AVAILABLE
+  previous_tier: QUARANTINE
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://github.com/zahran1234/EgyptionCompaniesReviews_Sentiment_analysis (inspected,
+    does not confirm claimed scale/provenance)
+- dataset_id: emotionaltone_egyptian
+  canonical_name: EmotionalTone
+  portfolio_tier: TARGET_TIER_B_PENDING_ACQUISITION
+  status: PAPER_VERIFIED_DATASET_NOT_OBTAINED
+  files_obtained: false
+  verified_n: 10000
+  language: Egyptian Arabic
+  egypt_specific: PROVEN
+  platform: Twitter/X; Egypt geolocation; 2016 Olympics topic
+  commerce_relevance: LOW
+  task: eight emotions
+  data_license: NOT_FOUND
+  paper_license: PAPER_RIGHTS_UNKNOWN
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: NOT_INDEPENDENTLY_CLEARED
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://link.springer.com/chapter/10.1007/978-3-319-77116-8_8
+  - PMC/Frontiers secondary corroboration
+- dataset_id: egyptian_ecommerce_323k_corpus
+  canonical_name: Arabic e-commerce reviews corpus (~323,150)
+  portfolio_tier: DATA_NOT_PUBLICLY_AVAILABLE
+  status: PAPER_VERIFIED_DATA_NOT_PUBLICLY_AVAILABLE
+  files_obtained: false
+  verified_n: 323150
+  language: Arabic
+  egypt_specific: NOT_PROVEN
+  platform: unspecified real Arabic e-commerce sites
+  commerce_relevance: HIGH
+  task: consumer behavior/sustainability lexical analysis
+  data_license: NOT_FOUND
+  paper_license: CC_BY_4.0_PAPER
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: ARABIC_ECOMMERCE_LANGUAGE_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: DATA_NOT_PUBLICLY_AVAILABLE
+  previous_tier: REJECT
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://doi.org/10.3390/su141912860
+- dataset_id: jumia_egypt_reviews_jerd
+  canonical_name: Jumia Egypt Reviews Dataset / JERD
+  portfolio_tier: QUARANTINE
+  status: QUARANTINE_PROVENANCE
+  files_obtained: false
+  verified_n: null
+  language: Unverified
+  egypt_specific: PROVEN
+  platform: claimed Jumia Egypt
+  commerce_relevance: HIGH
+  task: ratings/sentiment claimed
+  data_license: UNKNOWN
+  paper_license: N/A
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: ARABIC_ECOMMERCE_LANGUAGE_BENCHMARK
+  primary_source_verified: 'YES'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: QUARANTINE_PROVENANCE
+  previous_tier: QUARANTINE
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://www.kaggle.com/datasets/aliallam13/jumia-egypt-reviews
+- dataset_id: arzen_code_switch_speech_corpus
+  canonical_name: ArzEn
+  portfolio_tier: TARGET_TIER_B_PENDING_ACQUISITION
+  status: ACCESS_PENDING
+  files_obtained: false
+  verified_n: null
+  language: Egyptian Arabic-English speech
+  egypt_specific: PROVEN
+  platform: recorded interviews
+  commerce_relevance: LOW
+  task: ASR/code switching
+  data_license: ACCESS_RESTRICTED_OR_UNRESOLVED
+  paper_license: CC_BY_NC_PAPER
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://aclanthology.org/2020.lrec-1.523/
+  - ResearchGate secondary listing
+- dataset_id: hard_hotel_reviews
+  canonical_name: HARD
+  portfolio_tier: QUARANTINE
+  status: QUARANTINE_LICENSE
+  files_obtained: false
+  verified_n: null
+  language: Arabic
+  egypt_specific: NOT_PROVEN
+  platform: Booking.com
+  commerce_relevance: MEDIUM
+  task: ratings/sentiment
+  data_license: NOT_FOUND
+  paper_license: SPRINGER_PAPER_RIGHTS
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: MEDIUM
+  final_role: ARABIC_GENERAL_REVIEW_BENCHMARK
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: QUARANTINE_LICENSE
+  previous_tier: QUARANTINE
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://github.com/elnagara/HARD-Arabic-Dataset (fetched directly)
+  - https://link.springer.com/chapter/10.1007/978-3-319-67056-0_3
+- dataset_id: arabic_feedback_corpus_logistics_candidate
+  canonical_name: Unidentified Arabic logistics feedback corpus
+  portfolio_tier: REJECTED
+  status: REJECTED_UNIDENTIFIED
+  files_obtained: false
+  verified_n: null
+  language: Unknown
+  egypt_specific: NOT_PROVEN
+  platform: Unknown
+  commerce_relevance: UNKNOWN
+  task: unknown
+  data_license: UNKNOWN
+  paper_license: UNKNOWN
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: UNKNOWN
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: DATA_NOT_PUBLICLY_AVAILABLE
+  previous_tier: REJECT
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - dedicated WebSearch queries this session
+- dataset_id: arabic_food_delivery_sentiment_research
+  canonical_name: Arabic food-delivery sentiment research
+  portfolio_tier: TARGET_TIER_B_PENDING_ACQUISITION
+  status: ACCESS_PENDING
+  files_obtained: false
+  verified_n: null
+  language: Arabic
+  egypt_specific: NOT_PROVEN
+  platform: food delivery
+  commerce_relevance: MEDIUM
+  task: sentiment
+  data_license: UNKNOWN
+  paper_license: PAPER_RIGHTS_UNKNOWN
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://peerj.com/articles/cs-2669/
+  - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11888876/
+- dataset_id: egyptian_2_5m_dialect_collection
+  canonical_name: 2.5M Egyptian dialect collection
+  portfolio_tier: REJECTED
+  status: REJECTED_WEAK_PROVENANCE_DOMAIN_MISMATCH
+  files_obtained: false
+  verified_n: null
+  language: Egyptian Arabic
+  egypt_specific: PROVEN
+  platform: synthetic/community
+  commerce_relevance: LOW
+  task: dialect/translation
+  data_license: UNKNOWN
+  paper_license: N/A
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: QUARANTINE_PROVENANCE
+  previous_tier: REJECT
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - GitHub repository description (fetched via search, not independently verified
+    in depth)
+- dataset_id: commercial_egyptian_callcenter_vendors
+  canonical_name: Commercial Egyptian call-center vendors
+  portfolio_tier: ACCESS_PENDING
+  status: PAID_ACCESS_PENDING
+  files_obtained: false
+  verified_n: null
+  language: Egyptian Arabic
+  egypt_specific: PROVEN
+  platform: call center
+  commerce_relevance: HIGH
+  task: speech/customer service
+  data_license: COMMERCIAL_CONTRACT_REQUIRED
+  paper_license: N/A
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: CONTRACT_REVIEW_REQUIRED
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: CUSTOMER_SERVICE_LANGUAGE_BENCHMARK
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://www.futurebeeai.com/dataset/speech-dataset/retail-call-center-conversation-arabic-egypt
+  - https://data.macgence.com/dataset/egyptian-arabic-general-conversation-customer-speech-dataset
+- dataset_id: arabic_inquiry_answer_dialogue_acts
+  canonical_name: Arabic inquiry-answer dialogue acts
+  portfolio_tier: TARGET_TIER_B_PENDING_ACQUISITION
+  status: ACCESS_PENDING
+  files_obtained: false
+  verified_n: 52
+  language: Egyptian Arabic
+  egypt_specific: PROVEN
+  platform: bank/EgyptAir calls
+  commerce_relevance: LOW
+  task: dialogue acts
+  data_license: UNKNOWN
+  paper_license: PAPER_RIGHTS_UNKNOWN
+  code_license: N/A_OR_UNKNOWN
+  source_platform_terms: UNKNOWN_OR_NOT_APPLICABLE
+  commercial_use_status: NOT_READY
+  redistribution_status: DEFERRED_TO_RIGHTS_REVIEW
+  pii_risk: HIGH
+  final_role: RESEARCH_REFERENCE_ONLY
+  primary_source_verified: 'NO'
+  primary_files_obtained: 'NO'
+  trusted_mirror_found: 'NO'
+  mirror_equivalence_verified: NOT_APPLICABLE
+  previous_status: ACCESS_PENDING
+  previous_tier: TIER_C_RESEARCH_ONLY
+  change_reason: V2 active-vs-target normalization and targeted provenance remediation;
+    see erratum and status ledger.
+  evidence_sources:
+  - https://arxiv.org/pdf/1505.04197

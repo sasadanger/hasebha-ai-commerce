@@ -1,0 +1,27 @@
+experiment: {name: "Olist development-only expanded-feature sensitivity", id: "olist-phase2b-development-v1", parent: "olist-phase2a-strict-core-v1", seed: 42}
+parent_manifest: {canonical_sha256: "d72c2cf70d8b15ec71253fbf8877e687e98cd232f1cbf2a6d801ec9d9f3be661", physical_sha256: "b0e3d7d27d743fc9282bb19edffdc103e39211dd2f694435b2563382be95c83d"}
+contracts: {feature: "olist-feature-contract-v1", eligibility: "olist-eligibility-v1", anomaly: "olist-timestamp-anomaly-v1", target_semantics: "VALID_RETROSPECTIVE_PROMISE_BREACH_TARGET_WITH_UNVERIFIED_ASOF_SEMANTICS"}
+prediction_timestamp: order_approved_at
+target: {formula: "order_delivered_customer_date > order_estimated_delivery_date", positive: "late_delivery = 1"}
+development_only: true
+test_exclusion: {start: "2018-05-01", rule: "order_approved_at < 2018-05-01; no final-test route"}
+development: {start: "2016-09-01", end_exclusive: "2018-05-01", rows: 70338, positive: 6226, negative: 64112}
+folds:
+  - {id: fold_1, train_start: "2016-09-01", train_end_exclusive: "2017-07-01", validation_start: "2017-07-01", validation_end_exclusive: "2017-10-01"}
+  - {id: fold_2, train_start: "2016-09-01", train_end_exclusive: "2017-10-01", validation_start: "2017-10-01", validation_end_exclusive: "2018-01-01"}
+  - {id: fold_3, train_start: "2016-09-01", train_end_exclusive: "2018-01-01", validation_start: "2018-01-01", validation_end_exclusive: "2018-05-01"}
+strict_features: [purchase_year, purchase_month, purchase_day_of_week, purchase_hour, approval_year, approval_month, approval_day_of_week, approval_hour, purchase_to_approval_seconds]
+primary_asof_approved_features: []
+retrospective_expanded_features: [payment_record_count, max_payment_installments, total_payment_value, item_count, unique_product_count, unique_seller_count, total_item_price, total_freight_value, mean_freight_value, max_freight_value, product_category_diversity, mean_product_weight_g, mean_product_length_cm, mean_product_height_cm, mean_product_width_cm]
+classification: CONDITIONALLY_ALLOWED_RETROSPECTIVE_SENSITIVITY
+models:
+  dummy: {strategy: prior}
+  logistic_regression: {C: 10.0, penalty: l2, solver: lbfgs, max_iter: 2000}
+  catboost: {depth: 4, learning_rate: 0.1, iterations: 10}
+  lightgbm: {num_leaves: 31, max_depth: 7, learning_rate: 0.03, min_child_samples: 20, n_estimators: 1}
+preprocessing: {numeric_missing: "training-fold median", scaling: "training-fold StandardScaler for Logistic only", categorical: "none approved", resampling: false}
+metrics: {primary: Average Precision, secondary: [roc_auc, brier_score, log_loss], ece_bins: 10, bootstrap_seed: 42, bootstrap_resamples: 1000, capacities: [1, 5, 10, 20]}
+success: {supported: "paired delta AP CI > 0, majority folds improve, no severe probability degradation, no leakage", labels: [SUPPORTED_INCREMENTAL_SIGNAL, INCONCLUSIVE_INCREMENTAL_SIGNAL, NO_INCREMENTAL_SIGNAL, DEGRADED_PERFORMANCE]}
+paths: {report_dir: "reports/generated/olist/phase2b", artifact_dir: "artifacts/experiments/olist/phase2b/olist-phase2b-development-v1"}
+protected_phase2a: ["reports/generated/olist/phase2a/selection_manifest.json", "reports/generated/olist/phase2a/test_access_ledger.json", "reports/generated/olist/phase2a/final_test_metrics.json", "artifacts/experiments/olist/phase2a/olist-phase2a-strict-core-v1/predictions"]
+limitations: ["Retrospective snapshot-assumption sensitivity only", "Legal/licensing NO-GO", "Production NO-GO", "Egyptian-market validity NO-GO"]

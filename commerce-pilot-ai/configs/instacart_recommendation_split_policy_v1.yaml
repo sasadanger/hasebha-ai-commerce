@@ -1,0 +1,88 @@
+# Instacart recommendation-evaluation split policy — v1 (2026-08-14).
+#
+# Governs the leakage-safe, deterministic, user-level partitioning used for
+# offline development and one-time protected-test evaluation of the
+# CommercePilot v1 Instacart recommendation capability. Frozen before any
+# candidate comparison work began.
+
+schema_version: instacart-split-policy-v1
+frozen_at: "2026-08-14"
+
+population:
+  description: >
+    Only users whose held-out "final" order has known contents are usable
+    for offline evaluation. In this dataset every user has exactly one
+    designated final order flagged via orders.eval_set, which is always
+    that user's max(order_number) (verified: 206,209/206,209 users). Users
+    whose final order is eval_set='test' (75,000 users) have no product
+    contents available anywhere in this dataset (order_products__test.csv
+    does not exist) -- they are Instacart's own Kaggle-competition holdout
+    and are structurally unusable as either development or protected-test
+    material here. Users whose final order is eval_set='train' (131,209
+    users) have their final-order contents in order_products__train.parquet
+    (verified: exact 1:1 order_id match, 0 mismatches) -- this is the full
+    usable population.
+  eligible_eval_set_for_target: train
+  eligible_user_count: 131209
+  excluded_eval_set: test
+  excluded_user_count: 75000
+  exclusion_reason: no ground-truth basket contents available in this dataset
+
+history_target_definition:
+  history: >
+    All of a user's orders with eval_set='prior' (verified: always exactly
+    order_number 1..N-1 for that user, contiguous, no gaps).
+  target: >
+    The single order with eval_set='train' for that user (verified: always
+    order_number N, i.e. max(order_number) for that user), and its basket
+    contents from order_products__train.parquet.
+  leakage_rule: >
+    Target-order contents, and any order with order_number >= the target
+    order's order_number, must never be used to compute features,
+    popularity/co-occurrence statistics, or any recommender input for that
+    user's own prediction. days_since_prior_order and order_dow/hour for the
+    target order itself are also target-adjacent and are not used as
+    features (only used, if at all, as evaluation-time context).
+
+partitioning:
+  method: deterministic_hash_bucket
+  formula: >
+    bucket(user_id) = int(sha256(f"instacart-v1-user-{user_id}").hexdigest(), 16) % 1_000_000 / 1_000_000.0
+  salt: "instacart-v1-user-"
+  applies_to: eligible population only (131,209 users with eval_set='train' final order)
+  buckets:
+    PROTECTED_TEST:
+      condition: "bucket < 0.20"
+      target_fraction: 0.20
+      purpose: >
+        Held out completely from all development, candidate comparison,
+        statistic-fitting, and tuning. Opened at most once, after the
+        candidate/config/hashes are frozen (PRE_TEST_RELEASE_RECORD).
+    DEV_EVAL:
+      condition: "0.20 <= bucket < 0.36"
+      target_fraction: 0.16
+      purpose: >
+        Used only to compare baselines/challengers head-to-head and choose K
+        and the final candidate. Never used to fit population-level
+        statistics (popularity/co-occurrence tables) during development.
+    DEV_FIT:
+      condition: "bucket >= 0.36"
+      target_fraction: 0.64
+      purpose: >
+        Used to fit population-level statistics (item popularity, item-item
+        co-occurrence) consumed by candidates during development scoring on
+        DEV_EVAL.
+  freeze_time_refit: >
+    Before protected-test access, the frozen candidate's statistics are
+    refit on the full DEV partition (DEV_FIT + DEV_EVAL combined, i.e. all
+    non-protected-test eligible users), then applied unchanged to
+    PROTECTED_TEST users' own histories for the one-time final evaluation.
+    This mirrors standard train+validation refit before a single held-out
+    test pass.
+
+no_random_row_split: true
+split_granularity: user_id
+reproducibility_note: >
+  This is a pure function of user_id and a fixed salt string -- no RNG seed
+  is required or used; re-running the split script against the same
+  orders.parquet reproduces identical partitions.
