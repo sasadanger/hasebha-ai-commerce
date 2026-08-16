@@ -37,118 +37,191 @@ export default async function initial_data_seed({
 
   const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
 
-  logger.info("Seeding store data...");
-  const {
-    result: [defaultSalesChannel],
-  } = await createSalesChannelsWorkflow(container).run({
-    input: {
-      salesChannelsData: [
-        {
-          name: "Default Sales Channel",
-          description: "Created by Medusa",
-        },
-      ],
-    },
+  // This script is auto-discovered and run by `medusa db:migrate` on every
+  // container start (any file under migration-scripts/ is treated as a
+  // once-run migration by Medusa). If an earlier attempt partially
+  // completed before crashing (e.g. during initial cloud deployment), a
+  // retry would otherwise create duplicate sales channels/API
+  // keys/stores/regions -- so every step here checks for an existing
+  // entity by name first, matching the pattern used by the
+  // Egypt-region/catalog scripts written later in this project.
+  const { data: existingSalesChannels } = await query.graph({
+    entity: "sales_channel",
+    filters: { name: "Default Sales Channel" },
+    fields: ["id"],
   });
 
-  const {
-    result: [publishableApiKey],
-  } = await createApiKeysWorkflow(container).run({
-    input: {
-      api_keys: [
-        {
-          title: "Default Publishable API Key",
-          type: "publishable",
-          created_by: "",
-        },
-      ],
-    },
-  });
-
-  await linkSalesChannelsToApiKeyWorkflow(container).run({
-    input: {
-      id: publishableApiKey.id,
-      add: [defaultSalesChannel.id],
-    },
-  });
-
-  const {
-    result: [store],
-  } = await createStoresWorkflow(container).run({
-    input: {
-      stores: [
-        {
-          name: "Default Store",
-          supported_currencies: [
-            {
-              currency_code: "eur",
-              is_default: true,
-            },
-            {
-              currency_code: "usd",
-              is_default: false,
-            },
-          ],
-          default_sales_channel_id: defaultSalesChannel.id,
-        },
-      ],
-    },
-  });
-
-  logger.info("Seeding region data...");
-  const { result: regionResult } = await createRegionsWorkflow(container).run({
-    input: {
-      regions: [
-        {
-          name: "Europe",
-          currency_code: "eur",
-          countries,
-          payment_providers: ["pp_system_default"],
-        },
-      ],
-    },
-  });
-  const region = regionResult[0];
-  logger.info("Finished seeding regions.");
-
-  logger.info("Seeding tax regions...");
-  await createTaxRegionsWorkflow(container).run({
-    input: countries.map((country_code) => ({
-      country_code,
-      provider_id: "tp_system",
-    })),
-  });
-  logger.info("Finished seeding tax regions.");
-
-  logger.info("Seeding stock location data...");
-  const { result: stockLocationResult } = await createStockLocationsWorkflow(
-    container
-  ).run({
-    input: {
-      locations: [
-        {
-          name: "European Warehouse",
-          address: {
-            city: "Copenhagen",
-            country_code: "DK",
-            address_1: "",
+  let defaultSalesChannel: any = existingSalesChannels[0];
+  if (!defaultSalesChannel) {
+    logger.info("Seeding store data...");
+    const {
+      result: [created],
+    } = await createSalesChannelsWorkflow(container).run({
+      input: {
+        salesChannelsData: [
+          {
+            name: "Default Sales Channel",
+            description: "Created by Medusa",
           },
-        },
-      ],
-    },
-  });
-  const stockLocation = stockLocationResult[0];
+        ],
+      },
+    });
+    defaultSalesChannel = created;
+  } else {
+    logger.info("Default Sales Channel already exists, reusing.");
+  }
 
-  await link.create({
-    [Modules.STOCK_LOCATION]: {
-      stock_location_id: stockLocation.id,
-    },
-    [Modules.FULFILLMENT]: {
-      fulfillment_provider_id: "manual_manual",
-    },
+  const { data: existingApiKeys } = await query.graph({
+    entity: "api_key",
+    filters: { title: "Default Publishable API Key" },
+    fields: ["id"],
   });
 
-  logger.info("Seeding fulfillment data...");
+  let publishableApiKey: any = existingApiKeys[0];
+  if (!publishableApiKey) {
+    const {
+      result: [created],
+    } = await createApiKeysWorkflow(container).run({
+      input: {
+        api_keys: [
+          {
+            title: "Default Publishable API Key",
+            type: "publishable",
+            created_by: "",
+          },
+        ],
+      },
+    });
+    publishableApiKey = created;
+
+    await linkSalesChannelsToApiKeyWorkflow(container).run({
+      input: {
+        id: publishableApiKey.id,
+        add: [defaultSalesChannel.id],
+      },
+    });
+  } else {
+    logger.info("Default Publishable API Key already exists, reusing.");
+  }
+
+  const { data: existingStores } = await query.graph({
+    entity: "store",
+    fields: ["id"],
+  });
+
+  let store: any = existingStores[0];
+  if (!store) {
+    const {
+      result: [created],
+    } = await createStoresWorkflow(container).run({
+      input: {
+        stores: [
+          {
+            name: "Default Store",
+            supported_currencies: [
+              {
+                currency_code: "eur",
+                is_default: true,
+              },
+              {
+                currency_code: "usd",
+                is_default: false,
+              },
+            ],
+            default_sales_channel_id: defaultSalesChannel.id,
+          },
+        ],
+      },
+    });
+    store = created;
+  } else {
+    logger.info("A store already exists, reusing.");
+  }
+
+  const { data: existingRegions } = await query.graph({
+    entity: "region",
+    filters: { name: "Europe" },
+    fields: ["id"],
+  });
+
+  let region: any = existingRegions[0];
+  if (!region) {
+    logger.info("Seeding region data...");
+    const { result: regionResult } = await createRegionsWorkflow(container).run({
+      input: {
+        regions: [
+          {
+            name: "Europe",
+            currency_code: "eur",
+            countries,
+            payment_providers: ["pp_system_default"],
+          },
+        ],
+      },
+    });
+    region = regionResult[0];
+    logger.info("Finished seeding regions.");
+  } else {
+    logger.info("Europe region already exists, reusing.");
+  }
+
+  const { data: existingTaxRegions } = await query.graph({
+    entity: "tax_region",
+    filters: { country_code: "gb" },
+    fields: ["id"],
+  });
+  if (!existingTaxRegions[0]) {
+    logger.info("Seeding tax regions...");
+    await createTaxRegionsWorkflow(container).run({
+      input: countries.map((country_code) => ({
+        country_code,
+        provider_id: "tp_system",
+      })),
+    });
+    logger.info("Finished seeding tax regions.");
+  } else {
+    logger.info("Tax regions already exist, reusing.");
+  }
+
+  const { data: existingStockLocations } = await query.graph({
+    entity: "stock_location",
+    filters: { name: "European Warehouse" },
+    fields: ["id"],
+  });
+
+  let stockLocation: any = existingStockLocations[0];
+  if (!stockLocation) {
+    logger.info("Seeding stock location data...");
+    const { result: stockLocationResult } = await createStockLocationsWorkflow(
+      container
+    ).run({
+      input: {
+        locations: [
+          {
+            name: "European Warehouse",
+            address: {
+              city: "Copenhagen",
+              country_code: "DK",
+              address_1: "",
+            },
+          },
+        ],
+      },
+    });
+    stockLocation = stockLocationResult[0];
+
+    await link.create({
+      [Modules.STOCK_LOCATION]: {
+        stock_location_id: stockLocation.id,
+      },
+      [Modules.FULFILLMENT]: {
+        fulfillment_provider_id: "manual_manual",
+      },
+    });
+  } else {
+    logger.info("European Warehouse stock location already exists, reusing.");
+  }
+
   // This is created by a migration script in core.
   const { data: shippingProfileResult } = await query.graph({
     entity: "shipping_profile",
@@ -156,55 +229,74 @@ export default async function initial_data_seed({
   });
   const shippingProfile = shippingProfileResult[0];
 
-  const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
-    name: "European Warehouse delivery",
-    type: "shipping",
-    service_zones: [
-      {
-        name: "Europe",
-        geo_zones: [
-          {
-            country_code: "gb",
-            type: "country",
-          },
-          {
-            country_code: "de",
-            type: "country",
-          },
-          {
-            country_code: "dk",
-            type: "country",
-          },
-          {
-            country_code: "se",
-            type: "country",
-          },
-          {
-            country_code: "fr",
-            type: "country",
-          },
-          {
-            country_code: "es",
-            type: "country",
-          },
-          {
-            country_code: "it",
-            type: "country",
-          },
-        ],
+  const { data: existingFulfillmentSets } = await query.graph({
+    entity: "fulfillment_set",
+    filters: { name: "European Warehouse delivery" },
+    fields: ["id", "service_zones.id"],
+  });
+
+  let fulfillmentSet: any = existingFulfillmentSets[0];
+  if (!fulfillmentSet) {
+    logger.info("Seeding fulfillment data...");
+    fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
+      name: "European Warehouse delivery",
+      type: "shipping",
+      service_zones: [
+        {
+          name: "Europe",
+          geo_zones: [
+            {
+              country_code: "gb",
+              type: "country",
+            },
+            {
+              country_code: "de",
+              type: "country",
+            },
+            {
+              country_code: "dk",
+              type: "country",
+            },
+            {
+              country_code: "se",
+              type: "country",
+            },
+            {
+              country_code: "fr",
+              type: "country",
+            },
+            {
+              country_code: "es",
+              type: "country",
+            },
+            {
+              country_code: "it",
+              type: "country",
+            },
+          ],
+        },
+      ],
+    });
+
+    await link.create({
+      [Modules.STOCK_LOCATION]: {
+        stock_location_id: stockLocation.id,
       },
-    ],
+      [Modules.FULFILLMENT]: {
+        fulfillment_set_id: fulfillmentSet.id,
+      },
+    });
+  } else {
+    logger.info("European Warehouse delivery fulfillment set already exists, reusing.");
+  }
+
+  const { data: existingShippingOptions } = await query.graph({
+    entity: "shipping_option",
+    filters: { name: "Standard Shipping" },
+    fields: ["id"],
   });
 
-  await link.create({
-    [Modules.STOCK_LOCATION]: {
-      stock_location_id: stockLocation.id,
-    },
-    [Modules.FULFILLMENT]: {
-      fulfillment_set_id: fulfillmentSet.id,
-    },
-  });
-
+  if (!existingShippingOptions[0]) {
   await createShippingOptionsWorkflow(container).run({
     input: [
       {
@@ -286,15 +378,31 @@ export default async function initial_data_seed({
     ],
   });
   logger.info("Finished seeding fulfillment data.");
+  } else {
+    logger.info("Standard/Express shipping options already exist, reusing.");
+  }
 
-  await linkSalesChannelsToStockLocationWorkflow(container).run({
-    input: {
-      id: stockLocation.id,
-      add: [defaultSalesChannel.id],
-    },
-  });
+  try {
+    await linkSalesChannelsToStockLocationWorkflow(container).run({
+      input: {
+        id: stockLocation.id,
+        add: [defaultSalesChannel.id],
+      },
+    });
+  } catch (err) {
+    logger.info(`Sales channel <-> stock location link step skipped: ${(err as Error).message}`);
+  }
   logger.info("Finished seeding stock location data.");
 
+  const { data: existingProducts } = await query.graph({
+    entity: "product",
+    filters: { handle: "t-shirt" },
+    fields: ["id"],
+  });
+
+  if (existingProducts[0]) {
+    logger.info("Demo products already exist, skipping product/category/option/inventory seeding.");
+  } else {
   logger.info("Seeding product data...");
 
   const { result: categoryResult } = await createProductCategoriesWorkflow(
@@ -836,4 +944,5 @@ export default async function initial_data_seed({
   });
 
   logger.info("Finished seeding inventory levels data.");
+  }
 }

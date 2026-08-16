@@ -1,0 +1,20 @@
+# Deployment-only dependency set for src/ai_service (the FastAPI app).
+#
+# This intentionally excludes the full research/training stack in
+# requirements.txt (torch, transformers, datasets, accelerate,
+# scikit-learn, lightgbm, duckdb, pyarrow, matplotlib, openpyxl) --
+# none of those are imported at FastAPI startup or by the
+# fulfillment-risk / decision-engine / recommendation code paths that
+# are actually served in production. NLP transformer inference
+# (src/ai_service/services/nlp_inference.py) imports torch lazily
+# inside its inference call and is already wrapped in a try/except that
+# returns HTTP 503 "NLP model unavailable" if that import or the model
+# load fails -- so omitting torch/transformers here degrades that one
+# capability honestly instead of crashing the service. Do not add heavy
+# ML packages here without also reconsidering the deployment image size.
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.32,<1.0
+pydantic>=2.9,<3.0
+httpx>=0.27,<1.0
+catboost==1.2.10
+PyYAML>=6.0,<7.0

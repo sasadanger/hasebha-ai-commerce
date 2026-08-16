@@ -1,0 +1,50 @@
+# Deployment upload filter for the AI service (railway up, run from this
+# directory). Independent of .gitignore -- this repo's model artifacts and
+# datasets are intentionally excluded from the public GitHub repo (see the
+# root .gitignore notes), so a git-connected deploy would have no model to
+# load. `railway up` instead uploads the local working directory directly,
+# and this file scopes that upload to exactly what the deployed FastAPI
+# service (src/ai_service) needs to serve real inference for the core
+# fulfillment-risk + Decision Engine + recommendation paths, while
+# deliberately excluding the ~3GB NLP/Jumia transformer weight exports --
+# those load lazily on first /v1/nlp/analyze request and are wrapped in a
+# try/except that returns HTTP 503 "NLP model unavailable" if the weights
+# aren't present, which is the honest degraded state for this deployment
+# (see requirements-deploy.txt for the matching dependency scoping).
+
+# Local envs / caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.git/
+.claude/
+
+# Raw/processed datasets -- never needed at inference time
+data/
+
+# Large research-only artifacts not required for the deployed capabilities
+artifacts/experiments/nlp/inference_exports/B2_MARBERT/
+artifacts/experiments/nlp/inference_exports/C_AraBERT/
+artifacts/experiments/nlp/inference_exports/C_MARBERT/
+artifacts/experiments/nlp/inference_exports/E_MARBERT/
+artifacts/experiments/jumia/
+
+# Notebooks, docs, tests, dev-session checkpoints -- not needed at runtime
+notebooks/
+docs/
+tests/
+reports/checkpoints/*/
+!reports/checkpoints/nlp_deployment_promotion_registry_v1_2026-08-14/
+
+# Packaging/review clutter (already excluded from the public repo too)
+PACKAGING_VERIFICATION*.txt
+V2_PACKAGE_MANIFEST.json
+V2_REVIEW_README.md
+V3_PACKAGE_MANIFEST.json
+V3_REVIEW_README.md
+
+# Full research requirements.txt is not used for this deployment --
+# requirements-deploy.txt is installed instead (see Dockerfile).
