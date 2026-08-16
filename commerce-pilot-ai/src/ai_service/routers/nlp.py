@@ -13,7 +13,9 @@ silently 501'd like an unbuilt capability.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from src.ai_service.auth import require_api_key
 
 from src.ai_service.schemas import (
     NlpAnalyzeRequest,
@@ -23,7 +25,7 @@ from src.ai_service.schemas import (
 )
 from src.ai_service.services.nlp_inference import AMAZON_TASK
 
-router = APIRouter(prefix="/v1/nlp", tags=["nlp"])
+router = APIRouter(prefix="/v1/nlp", tags=["nlp"], dependencies=[Depends(require_api_key)])
 
 TASK_NAMES = {"E": "MPOLD", "B2": "ASTD", "C": "LABR", "A": "Amazon Appliances"}
 MODEL_SHORT_TO_KEY = {

@@ -39,6 +39,7 @@ import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 const AI_SERVICE_URL = process.env.COMMERCEPILOT_AI_SERVICE_URL || "http://localhost:8123"
+const AI_SERVICE_API_KEY = process.env.COMMERCEPILOT_AI_SERVICE_API_KEY || ""
 const REQUEST_TIMEOUT_MS = 5000
 const MAX_RETRIES = 2
 const RETRY_BACKOFF_MS = [200, 500]
@@ -102,7 +103,10 @@ async function postJsonWithRetry<T>(path: string, body: unknown): Promise<AiCall
     try {
       const res = await fetch(`${AI_SERVICE_URL}${path}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(AI_SERVICE_API_KEY ? { "X-Internal-Api-Key": AI_SERVICE_API_KEY } : {}),
+        },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       })

@@ -6,11 +6,12 @@ from fastapi.testclient import TestClient
 
 from src.ai_service.main import app
 from src.ai_service.services.decision_engine import DecisionEngineConfig, DecisionInput, evaluate
+from tests.conftest import TEST_API_KEY
 
 
 @pytest.fixture()
 def client():
-    with TestClient(app) as c:
+    with TestClient(app, headers={"X-Internal-Api-Key": TEST_API_KEY}) as c:
         yield c
 
 

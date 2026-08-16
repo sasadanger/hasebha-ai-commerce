@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
+from src.ai_service.auth import require_api_key
 from src.ai_service.schemas import DecisionRequest, DecisionResponse
 from src.ai_service.services.decision_engine import DecisionInput, evaluate
 
-router = APIRouter(prefix="/v1/decision", tags=["decision"])
+router = APIRouter(prefix="/v1/decision", tags=["decision"], dependencies=[Depends(require_api_key)])
 
 
 @router.post("", response_model=DecisionResponse)

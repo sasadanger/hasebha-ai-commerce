@@ -10,11 +10,13 @@ any catalog. See src/ai_service/services/recommendation_engine.py.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from src.ai_service.auth import require_api_key
 
 from src.ai_service.schemas import RecommendationRequest, RecommendationResponse, RecommendedItemResponse
 
-router = APIRouter(prefix="/v1/recommendations", tags=["recommendations"])
+router = APIRouter(prefix="/v1/recommendations", tags=["recommendations"], dependencies=[Depends(require_api_key)])
 
 
 @router.post("", response_model=RecommendationResponse)

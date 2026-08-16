@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
+from src.ai_service.auth import require_api_key
 from src.ai_service.schemas import FulfillmentRiskRequest, FulfillmentRiskResponse
 
-router = APIRouter(prefix="/v1/fulfillment", tags=["fulfillment"])
+router = APIRouter(prefix="/v1/fulfillment", tags=["fulfillment"], dependencies=[Depends(require_api_key)])
 
 
 @router.post("/risk", response_model=FulfillmentRiskResponse)

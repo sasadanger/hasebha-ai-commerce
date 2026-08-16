@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from src.ai_service.main import app
 from src.ai_service.services.nlp_inference import ArtifactIntegrityError, NlpInferenceService
 from src.ai_service.services.recommendation_engine import RecommendationEngineService
+from tests.conftest import TEST_API_KEY
 
 
 @pytest.fixture(scope="module")
@@ -23,7 +24,7 @@ def client():
     # loaded at most once for the whole file, not once per test -- keeping
     # peak RAM bounded per the project's "one heavy workload at a time"
     # resource discipline.
-    with TestClient(app) as c:
+    with TestClient(app, headers={"X-Internal-Api-Key": TEST_API_KEY}) as c:
         yield c
 
 
@@ -251,7 +252,7 @@ def test_recommendation_service_unavailable_returns_503(client):
 
 
 def test_recommendation_engine_error_path_returns_500_not_a_crash():
-    with TestClient(app, raise_server_exceptions=False) as c:
+    with TestClient(app, raise_server_exceptions=False, headers={"X-Internal-Api-Key": TEST_API_KEY}) as c:
         original = c.app.state.recommendation_service.recommend
 
         def _boom(*args, **kwargs):

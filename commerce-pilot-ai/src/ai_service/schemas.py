@@ -71,7 +71,10 @@ NlpTask = Literal["E", "B2", "C", "A"]
 
 
 class NlpAnalyzeRequest(BaseModel):
-    text: str = Field(min_length=1)
+    # max_length bounds request size before it reaches tokenization/model
+    # inference -- without it, an oversized payload is a resource-exhaustion
+    # vector. 10,000 chars comfortably covers real review/comment text.
+    text: str = Field(min_length=1, max_length=10_000)
     task: NlpTask
     model: Literal["marbert", "arabert"] | None = None
 
@@ -116,8 +119,12 @@ class RecommendationHistoryItem(BaseModel):
 
 class RecommendationRequest(BaseModel):
     customer_ref: str
-    history: list[RecommendationHistoryItem] = Field(default_factory=list)
-    k: int = 10
+    # Bounded for the same reason as NlpAnalyzeRequest.text: an unbounded
+    # list/k is a resource-exhaustion vector against the ranking engine.
+    # 1000 items is far beyond any real customer's purchase history; 100
+    # results is far beyond any real storefront recommendation slot.
+    history: list[RecommendationHistoryItem] = Field(default_factory=list, max_length=1000)
+    k: int = Field(default=10, ge=1, le=100)
 
 
 class RecommendedItemResponse(BaseModel):
