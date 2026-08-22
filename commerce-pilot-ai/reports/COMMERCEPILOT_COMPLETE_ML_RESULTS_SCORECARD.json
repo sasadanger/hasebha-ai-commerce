@@ -1,0 +1,139 @@
+{
+  "verified_at": "2026-08-21",
+  "tracks": [
+    {"track": "Arabic Sentiment (MPOLD/ASTD/LABR)", "status": "FROZEN", "production_status": "PRODUCTION (wired, /v1/nlp/analyze)"},
+    {"track": "Amazon NLP (Appliances)", "status": "FROZEN", "production_status": "NOT WIRED (artifact exists, inference service never loads it)"},
+    {"track": "Instacart Recommendation", "status": "FROZEN", "production_status": "PRODUCTION (wired)"},
+    {"track": "Olist V1", "status": "PRODUCTION", "production_status": "PRODUCTION, live, 5 real orders scored, untouched this session chain"},
+    {"track": "Olist V2", "status": "RESEARCH, STRESS_BENCHMARK", "production_status": "NOT PRODUCTION"},
+    {"track": "Olist V3 Seller-SLA (research, 23-feature)", "status": "RESEARCH_FULL_FEATURE_MODEL", "production_status": "NOT PRODUCTION (feature parity FAIL)"},
+    {"track": "Olist V3 Customer-Late T0 (stacked)", "status": "REJECTED for flagship use", "production_status": "NOT PRODUCTION"},
+    {"track": "Olist V3 Customer-Late T1", "status": "RESEARCH, MODERATE/TRIAGE", "production_status": "NOT PRODUCTION"},
+    {"track": "Olist Calibration (seller-SLA + production-parity)", "status": "APPLIED", "production_status": "N/A -- post-hoc calibration layer"},
+    {"track": "DataCo/EAGLE reproduction", "status": "UNRESOLVED_PROTOCOL_MISMATCH", "production_status": "NOT PRODUCTION, never in scope for HASEBHA"},
+    {"track": "HASEBHA production-parity model (13-feature)", "status": "RESEARCH-TRAINED, WEAK", "production_status": "SHADOW-WIRED, never executed against a real order"},
+    {"track": "HASEBHA shadow/production transfer (engineering)", "status": "IMPLEMENTED", "production_status": "code exists, never executed against a real order (verified via live DB query)"}
+  ],
+  "experiments": [
+    {"id": "arabic_label_smoothing", "hypothesis": "improves Macro-F1 vs plain MARBERTv2", "result_macro_f1": 0.7944433, "delta_vs_baseline": -0.0186, "threshold": "+0.3pp", "decision": "REJECTED", "reason": "clear decrease", "artifact": "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json"},
+    {"id": "arabic_class_weighted_ce", "hypothesis": "improves Macro-F1", "result_macro_f1": 0.8147855, "delta_vs_baseline": 0.00175, "threshold": "+0.3pp", "decision": "REJECTED", "reason": "sub-threshold", "artifact": "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json"},
+    {"id": "arabic_rdrop_alpha5", "hypothesis": "improves Macro-F1", "result_macro_f1": 0.8041008, "delta_vs_baseline": -0.0089, "threshold": "+0.3pp and acceptable cost", "decision": "REJECTED", "reason": "worse on both accuracy and cost (221.2s runtime, 4043MB VRAM)", "artifact": "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json"},
+    {"id": "arabic_sarf", "hypothesis": "matches/beats MARBERT at acceptable cost", "result_3seed_mean": 0.790103, "baseline_3seed_mean": 0.790577, "delta": -0.0005, "decision": "REJECTED", "reason": "statistical parity but ~1.9x runtime/VRAM cost", "artifact": "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json"},
+    {"id": "arabic_swa_ema", "hypothesis": "N/A", "decision": "NOT ATTEMPTED", "reason": "3/3 prior candidates failed, deliberate stop"},
+    {"id": "arabic_supcon", "hypothesis": "N/A", "decision": "NOT ATTEMPTED", "reason": "same as SWA/EMA plus highest implementation risk"},
+    {"id": "olist_v2_trucker_strike_hypothesis", "hypothesis": "May 2018 strike explains the AUC collapse", "decision": "REFUTED", "reason": "true late-rate peak was March 2018, 2 months before strike window; strike window itself near-average late rate (8.2%)", "artifact": "reports/generated/olist_v2/FINAL_SCORECARD.json"},
+    {"id": "olist_v2_temporal_strategies", "hypothesis": "adaptive temporal weighting improves robustness vs static", "result": {"static_mean": 0.6529, "static_worst": 0.5968, "recency_weighted_mean": 0.7126, "recency_weighted_worst": 0.6632}, "decision": "recency_weighted SELECTED", "reason": "best mean AUC among 3 historical-only-evaluated strategies", "artifact": "reports/generated/olist_v2/FINAL_SCORECARD.json"},
+    {"id": "olist_v3_t0_stacking", "hypothesis": "predicted seller-SLA risk improves customer-T0 AUC", "result_mean_delta": 0.003609, "decision": "REJECTED for flagship use", "reason": "trivial, inconsistent-sign delta across periods", "artifact": "reports/generated/olist_v3_multistage/TASK_B_C_RESULTS.json"},
+    {"id": "olist_v3_production_parity_ops_features", "hypothesis": "store-wide operational features improve the 13-feature production-parity model", "result": {"model_p_mean_auc": 0.5551351215216622, "model_p_plus_mean_auc": 0.5458327798711572}, "delta": -0.00930234165050503, "decision": "REJECTED", "reason": "negative gain -- store-wide history is noisier than genuine seller-level history", "artifact": "reports/generated/olist_v3_multistage/PRODUCTION_PARITY_MODEL_COMPARISON.json"},
+    {"id": "dataco_sigma_margin_target", "hypothesis": "mu_v + k*sigma_v threshold reproduces the paper's reported prevalence", "result": {"k=0.5_train": 0.0422, "k=0.5_val": 0.0010, "k=0.5_test": 0.0024}, "decision": "REJECTED", "reason": "partially fixes train prevalence but collapses val/test to near-zero", "artifact": "reports/generated/dataco/DATACO_TARGET_FORENSIC_CORRECTION.json"},
+    {"id": "dataco_eagle", "hypothesis": "paper-faithful EAGLE reproduces ~0.977 AUC", "decision": "NOT ATTEMPTED", "reason": "LSTM reproduction gate did not pass (predeclared gating rule)", "artifact": "reports/generated/dataco/LSTM_REPRODUCTION_GATE_DECISION.json"},
+    {"id": "seller_sla_isotonic_calibration", "hypothesis": "isotonic calibration improves Brier/ECE without damaging AUC", "result": {"raw_brier": 0.07171, "cal_brier": 0.07087, "raw_ece": 0.001134, "cal_ece": 0.000258, "raw_auc": 0.78855, "cal_auc": 0.78820}, "threshold": "AUC drop <= 0.005", "decision": "ACCEPTED", "artifact": "reports/generated/olist_v3_multistage/SELLER_SLA_CALIBRATION_REPORT.json"},
+    {"id": "production_parity_isotonic_calibration", "hypothesis": "same, for the 13-feature model", "result": {"raw_brier": 0.1255, "cal_brier": 0.0802, "raw_auc": 0.5655, "cal_auc": 0.5699}, "threshold": "AUC drop <= 0.005", "decision": "ACCEPTED", "artifact": "reports/generated/olist_v3_multistage/PRODUCTION_PARITY_CALIBRATION_REPORT.json"}
+  ],
+  "datasets": [
+    {"name": "Arabic (MPOLD/ASTD/LABR)", "type": "text classification benchmarks", "split": "group-safe, fixed split seed 20260809"},
+    {"name": "Amazon Appliances reviews", "rows": 2128605, "modeling_scope": "verified_purchase=True", "source": "data/processed/amazon_reviews_appliances/reviews_text_ready.parquet", "artifact": "reports/generated/amazon/scope_decision.md"},
+    {"name": "Instacart orders", "protected_test_n_users": 26314, "artifact": "reports/generated/instacart/protected_test_final_results.json"},
+    {"name": "Olist (V1/V2/V3 all share the same raw source)", "raw_source": "Brazilian e-commerce public dataset, 9 CSVs (data/raw/olist/extracted/)", "olist_orders_dataset_rows": 99441},
+    {"name": "Olist V3 seller-SLA canonical", "n_rows": 96380, "cohort": "single-seller orders, single distinct shipping_limit_date, 97388 of ~98666 item-joinable orders (98.70%)", "artifact": "reports/generated/olist_v3_multistage/SELLER_SLA_DATASET_META.json"},
+    {"name": "DataCo SMART SUPPLY CHAIN", "source": "Mendeley DOI 10.17632/8gx2fvg2k6.5 v5", "n_rows": 180519, "n_columns": 53, "sha256_verified": true, "artifact": "reports/generated/dataco/DATACO_ACQUISITION_PROVENANCE.json"}
+  ],
+  "final_models": [
+    {"model": "MARBERTv2 (Arabic)", "status": "FROZEN CHAMPION", "single_seed_macro_f1": 0.8130376, "3seed_mean_macro_f1": 0.7905768},
+    {"model": "TF-IDF+LinearSVC (Amazon)", "status": "FROZEN CHAMPION, unwired", "macro_f1": 0.9453970},
+    {"model": "hybrid_with_popularity_backfill (Instacart)", "status": "FROZEN, PRODUCTION", "precision_at_5": 0.36739378277721857},
+    {"model": "CatBoost (Olist V1)", "status": "PRODUCTION, live", "roc_auc": 0.5634406421203355},
+    {"model": "LightGBM Seller-SLA 23-feature (Olist V3)", "status": "RESEARCH_FULL_FEATURE_MODEL", "mean_temporal_auc": 0.7702329747962686, "worst_period_auc": 0.6762},
+    {"model": "LightGBM production-parity 13-feature", "status": "SHADOW-WIRED, WEAK, never scored a real order", "mean_temporal_auc": 0.5551351215216622, "worst_period_auc": 0.528866096197271}
+  ],
+  "rejected_models": [
+    {"model": "Arabic label smoothing", "reason": "clear decrease, -0.0186"},
+    {"model": "Arabic class-weighted CE", "reason": "sub-threshold gain, +0.0018 < +0.003"},
+    {"model": "Arabic R-Drop alpha=5", "reason": "worse on both accuracy and cost"},
+    {"model": "Arabic SARF", "reason": "statistical parity but ~1.9x cost"},
+    {"model": "Olist V3 customer-T0 stacked", "reason": "trivial delta, +0.0036, REJECTED for flagship use"},
+    {"model": "Olist V3 production-parity + store-wide ops features (Model P+)", "reason": "negative gain, -0.0093"},
+    {"model": "DataCo sigma-margin target alternative", "reason": "breaks val/test prevalence reproduction"},
+    {"model": "DataCo EAGLE", "reason": "not attempted, LSTM gate did not pass"}
+  ],
+  "calibration_results": [
+    {"model": "Olist V3 seller-SLA (research)", "method": "ISOTONIC", "raw_brier": 0.07171, "calibrated_brier": 0.07087, "raw_ece": 0.001134, "calibrated_ece": 0.000258, "raw_auc": 0.78855, "calibrated_auc": 0.78820},
+    {"model": "HASEBHA production-parity", "method": "ISOTONIC", "raw_brier": 0.1255, "calibrated_brier": 0.0802, "raw_auc": 0.5655, "calibrated_auc": 0.5699}
+  ],
+  "transfer_results": [
+    {"from": "Olist research seller-SLA (23-feature)", "to": "HASEBHA production-availability simulation", "original_mean_auc": 0.7702329747962686, "simulated_mean_auc": 0.518811509349124, "simulated_worst_auc": 0.4949065094176262, "delta": -0.2514214654471446, "verdict": "MATERIAL_COLLAPSE"},
+    {"from": "HASEBHA production-availability simulation finding", "to": "13-feature production-parity retrain", "mean_auc": 0.5551351215216622, "classification": "WEAK", "never_executed_against_real_order": true}
+  ],
+  "production_results": [
+    {"model": "Olist V1 CatBoost", "real_orders_scored": 5, "date_range": "2026-08-15 to 2026-08-16", "note": "only model with real HASEBHA execution history; 4/5 scored risk_class=high at threshold 0.1293; n=5 far too small to generalize"},
+    {"model": "HASEBHA production-parity shadow model", "real_orders_scored": 0, "note": "code exists and is tested, but zero real orders carry its metadata key in the live DB as of this investigation"}
+  ],
+  "negative_results": [
+    "Olist V2: protected-test AUC collapsed to 0.5117 vs dev 0.72-0.76 (static model)",
+    "Olist V2: trucker-strike hypothesis explicitly refuted by direct evidence",
+    "Olist V3: T0 stacking with predicted seller risk gives only +0.0036 mean AUC delta",
+    "Olist V3: production-availability simulation shows AUC collapse from 0.7702 to 0.5188 (worst 0.4949, below random) when seller-history features are unavailable",
+    "HASEBHA: production-parity retrain reaches only 0.5551 mean AUC (WEAK)",
+    "HASEBHA: store-wide operational features make the production-parity model worse, not better (-0.0093)",
+    "DataCo: LSTM reproduction reaches 0.6454 mean AUC vs published 0.9679, root-caused mathematically (CLT/sample-size argument) rather than left unexplained",
+    "DataCo: EAGLE never attempted, a predeclared methodological decision following the failed LSTM gate",
+    "5 Arabic post-freeze improvement candidates all rejected (3 tested, 2 not attempted due to consistent negative pattern)"
+  ],
+  "defensible_claims": [
+    "MARBERTv2 group-safe is the best evidence-supported model for MPOLD/ASTD/LABR under this project's tested protocol and budget",
+    "Instacart hybrid recommender achieves its reported protected-test metrics under a genuinely single-shot, pre-committed test-access protocol",
+    "Olist V3 seller-SLA model achieves mean temporal AUC 0.7702 on Olist research data under its 23-feature research protocol, leakage-tested",
+    "A quantitative, causally-explained demonstration exists that the same model collapses to near-random (0.52 AUC) under realistic HASEBHA feature availability",
+    "A retrained 13-feature production-parity model achieves AUC 0.5551 (weak) -- the best currently-known HASEBHA-transferable estimate",
+    "DataCo dataset acquisition and graph-structure reproduction are independently hash/count-verified; LSTM reproduction failure has a mathematically diagnosed cause"
+  ],
+  "claims_not_supported": [
+    "The project has a production HASEBHA fulfillment-risk model with 77% AUC",
+    "Shadow mode has validated the production-parity model on real orders",
+    "Arabic sentiment is validated for HASEBHA customer text specifically",
+    "DataCo/EAGLE reproduces the published 0.977 AUC",
+    "Amazon sentiment is served in production",
+    "The project has demonstrated real local E2E integration (Medusa+Postgres+FastAPI live round trip)"
+  ],
+  "evidence_artifacts": [
+    "configs/nlp_champion_registry.yaml",
+    "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json",
+    "reports/generated/amazon/metrics.json",
+    "reports/generated/amazon/transformer_final_eval.json",
+    "reports/generated/amazon/scope_decision.md",
+    "artifacts/experiments/amazon/models/amazon_tfidf_wordchar_linearsvc_size100000.joblib",
+    "src/ai_service/services/nlp_inference.py",
+    "src/ai_service/routers/nlp.py",
+    "reports/checkpoints/instacart_phase1_recommender_freeze_2026-08-14/",
+    "reports/generated/instacart/protected_test_final_results.json",
+    "src/ai_service/config.py",
+    "reports/generated/olist/phase2a/final_test_metrics.json",
+    "reports/generated/olist_v2/OLIST_V2_TEMPORAL_STABILITY_FINAL_REPORT.md",
+    "reports/generated/olist_v2/FINAL_SCORECARD.json",
+    "reports/generated/olist_v3_multistage/EVENT_SEMANTICS_AUDIT.json",
+    "reports/generated/olist_v3_multistage/MULTI_SELLER_TARGET_VALIDITY_AUDIT.json",
+    "reports/generated/olist_v3_multistage/SELLER_SLA_LEAKAGE_TESTS.json",
+    "reports/generated/olist_v3_multistage/SELLER_SLA_TEMPORAL_EVAL.json",
+    "reports/generated/olist_v3_multistage/TASK_B_C_RESULTS.json",
+    "reports/generated/olist_v3_multistage/SELLER_SLA_CALIBRATION_REPORT.json",
+    "reports/generated/olist_v3_multistage/SELLER_SLA_SINGLE_VENDOR_PARITY_REAUDIT.json",
+    "reports/generated/olist_v3_multistage/OLIST_SELLER_SLA_PRODUCTION_SIMULATION.json",
+    "reports/generated/olist_v3_multistage/PRODUCTION_PARITY_MODEL_COMPARISON.json",
+    "reports/generated/olist_v3_multistage/PRODUCTION_PARITY_CALIBRATION_REPORT.json",
+    "reports/generated/dataco/DATACO_ACQUISITION_PROVENANCE.json",
+    "reports/generated/dataco/EAGLE_PAPER_PIPELINE_SUMMARY.json",
+    "reports/generated/dataco/DATACO_LSTM_REPRODUCTION.json",
+    "reports/generated/dataco/DATACO_TARGET_FORENSIC_CORRECTION.json",
+    "reports/generated/dataco/LSTM_REPRODUCTION_GATE_DECISION.json",
+    "src/ai_service/services/seller_sla_risk.py",
+    "src/ai_service/services/production_parity_seller_sla.py",
+    "live PostgreSQL database (direct query, this session)",
+    "reports/COMMERCEPILOT_SUPERVISOR_HANDOFF_CURRENT_STATE.md"
+  ],
+  "audit_notes": [
+    "Feature-count labeling correction: seller-SLA model has 23 features (verified via len(FEATURE_ORDER)), not the '22-feature' label used pervasively in prior artifacts. Does not change any metric. Documentation correction, not a result conflict.",
+    "Amazon documentation vs artifact discrepancy: nlp.py docstring claims the classical champion 'was never serialized to disk'; a real hash-verified .joblib artifact exists. Correct description: artifact exists, inference service never wired to load it (keys_for_task returns [] unconditionally for AMAZON_TASK).",
+    "Olist V3 customer-T0 AUC (0.590956, this track's own protocol) vs Olist V2's separately-computed customer-T0 estimate (0.7126) are NOT the same measurement -- different cohorts/features/periods, not a true conflict, but easily misread as one.",
+    "No accidental Jumia inclusion, no accidental Olist V1 modification, no treatment of the 5 HASEBHA test orders as representative data, found in this reconstruction."
+  ]
+}

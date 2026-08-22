@@ -1,0 +1,117 @@
+{
+  "verified_at": "2026-08-21",
+  "repository_state": {
+    "git_head": "1a84602",
+    "branch": "main",
+    "modified_tracked_files": [
+      "commerce-pilot-ai/src/ai_service/config.py",
+      "commerce-pilot-ai/src/ai_service/main.py",
+      "commerce-pilot-ai/src/ai_service/routers/fulfillment.py",
+      "commerce-pilot-ai/src/ai_service/routers/health.py",
+      "commerce-pilot-ai/src/ai_service/schemas.py",
+      "medusa-app/commercepilot-medusa/apps/backend/src/subscribers/order-placed.ts"
+    ],
+    "untracked_file_count_approx": "70-76",
+    "closed_tracks_touched": false,
+    "disk_c_free_gb": 5.6,
+    "disk_d_free_gb": 685.9,
+    "disk_drop_explained_by_this_project_recent_activity": false,
+    "disk_drop_note": "Only 14.3MB written to the repo in the last 3 days (verified by file-mtime scan). commerce-pilot-ai/ totals 17.66GB on C: (mostly pre-existing NLP model checkpoints from many prior sessions) + 3.03GB pip cache. Root cause of the recent additional drop not fully attributable from within repo scope."
+  },
+  "architecture_state": {
+    "production_route": "/v1/fulfillment/risk (Olist V1 CatBoost, 2 timing features, live, order-placed.ts wired)",
+    "research_route": "/v1/fulfillment/seller-sla-risk (22-feature Olist V3 model, explicit manual input only, RESEARCH_OFFLINE_ONLY, never Medusa-derived)",
+    "shadow_route": "/v1/fulfillment/seller-sla-shadow (13-feature production-parity model, real-Medusa-derivable, WEAK signal, log-only, never triggers action)",
+    "decision_engine": "deterministic YAML-config rule evaluator, already generic (consumes fulfillment_risk_score), no code change needed for new models",
+    "persistence": "order.metadata (Medusa side, for wired events) + local JSONL PredictionFeedbackStore (FastAPI side, not a DB table)",
+    "seller_vendor_module_exists_in_medusa": false,
+    "database": "PostgreSQL via docker (commercepilot_medusa_postgres), real migrated Medusa schema, was STOPPED at investigation start, briefly started for read-only queries and stopped again"
+  },
+  "ml_track_state": {
+    "arabic": {"status": "FROZEN", "champion": "MARBERTv2 plain CE group-safe seed42", "3seed_mean_macro_f1": 0.790577, "source": "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json"},
+    "amazon": {"status": "FROZEN", "note": "classical champion evidenced but never serialized; endpoint honestly returns ARTIFACT_NOT_MATERIALIZED"},
+    "instacart": {"status": "FROZEN"},
+    "jumia": {"status": "EXCLUDED in recent sessions, but HAS a real historical track (jumia_phase9_freeze_and_protected_test_2026-08-15 etc.) predating that exclusion policy -- supervisor should not assume Jumia was never touched"},
+    "olist_v1": {"status": "PRODUCTION, untouched, live wired via order-placed.ts, only real execution history in the codebase (5 test orders)"},
+    "olist_v2": {"status": "STRESS_BENCHMARK, not production", "key_finding": "protected-test AUC collapsed to 0.51 vs dev 0.72-0.76, recency-weighting partially recovers to 0.59"},
+    "olist_v3_seller_sla_research": {"status": "RESEARCH_FULL_FEATURE_MODEL", "mean_auc": 0.7702, "worst_auc": 0.6762, "cannot_run_on_real_hasebha_orders": true},
+    "olist_v3_seller_sla_production_parity": {"status": "SHADOW_MODE_WEAK_SIGNAL", "mean_auc": 0.5551, "worst_auc": 0.5289, "can_run_on_real_hasebha_orders": true, "never_actually_scored_a_real_order": true},
+    "olist_v3_customer_t0_stacked": {"status": "REJECTED_RESEARCH_ONLY", "delta_vs_baseline": 0.0036},
+    "olist_v3_customer_t1": {"status": "MODERATE_TRIAGE", "mean_auc": 0.689},
+    "dataco_eagle": {"status": "UNRESOLVED_PROTOCOL_MISMATCH", "lstm_auc": 0.645, "published_lstm_auc": 0.968, "eagle_attempted": false, "root_cause": "target-prevalence mathematically incompatible with paper's reported rate given this dataset's per-node-window sample size"}
+  },
+  "first_party_data_state": {
+    "real_orders_in_db": 5,
+    "order_date_range": "2026-08-15 to 2026-08-16",
+    "fulfillment_records_in_db": 0,
+    "outcomes_observable": false,
+    "legitimate_fulfillment_risk_target_currently_constructible": false,
+    "reason": "requires both a real business SLA (does not exist) and real fulfillment.shipped_at events (zero exist)"
+  },
+  "business_sla_state": {
+    "real_sla_deadline_exists_in_hasebha": false,
+    "evidence": "ShippingOptionDTO has no promise/SLA field; no metadata convention found via source grep",
+    "specification_written_but_not_implemented": "reports/generated/olist_v3_multistage/HASEBHA_SHIPPING_SLA_PRODUCT_REQUIREMENT.md (fulfillment_due_at concept)",
+    "decision_owner": "HASEBHA business operations, not engineering"
+  },
+  "shadow_pipeline_state": {
+    "code_exists_and_connected": true,
+    "currently_executable": "yes in principle (tests pass against real artifact), never verified against a live combined stack",
+    "ever_scored_a_real_order": false,
+    "evidence": "direct DB query: 0 of 5 real orders contain the shadow metadata key",
+    "raw_feature_payload_persisted": false,
+    "model_version_persisted": true,
+    "prediction_outcome_joinable": "structurally yes (record_outcome() keyed by prediction_id), no reconciliation job exists, zero real outcomes to join"
+  },
+  "e2e_state": {
+    "unit_tests": "PASS (extensive, real model artifacts loaded)",
+    "integration_tests": "PASS (FastAPI TestClient + real loaded models)",
+    "mock_e2e": "NOT_FOUND",
+    "real_local_e2e": "NOT_RUN",
+    "real_production_e2e": "NOT_APPLICABLE",
+    "full_test_suite_last_known": "447/447 passing (from prior sprint; not re-run this session per the mission's no-new-experiments rule)"
+  },
+  "production_safety_state": {
+    "modified_files_count": 6,
+    "all_additive": true,
+    "closed_track_files_touched": false,
+    "readme_touched": false,
+    "storefront_touched": false,
+    "custom_medusa_modules_touched": false,
+    "database_modified_this_session": false,
+    "docker_containers_restored_to_original_stopped_state": true
+  },
+  "open_questions": [
+    "What is HASEBHA's actual real order volume/growth outside this 5-row dev DB?",
+    "Does HASEBHA operations have an informal shipping-time promise not yet in Medusa config?",
+    "Is StockLocation-based same_zone resolution worth implementing given the weak underlying signal either way?",
+    "Should PredictionFeedbackStore move to Postgres now, or is that premature at current volume?",
+    "What is actually consuming C: drive space beyond what this repo's recent activity explains?"
+  ],
+  "recommended_next_actions": [
+    "Priority 1: business-side definition of a real fulfillment_due_at / shipping SLA, and accumulation of real order+fulfillment volume -- not more Olist/DataCo modeling",
+    "Priority 2: extend PredictionFeedbackStore to persist raw feature payloads alongside scores, so a real training set can be reconstructed once outcomes start arriving",
+    "Priority 3: keep Arabic/Amazon/Instacart/Olist V1/Jumia/DataCo frozen; do not present the 22-feature research Seller-SLA model as a HASEBHA capability externally"
+  ],
+  "do_not_do": [
+    "Do not retrain the production-parity model hoping for a better number without new first-party signal",
+    "Do not wire the shadow route to any automated action",
+    "Do not treat the 5 test orders as representative",
+    "Do not invent a shipping SLA in code without a real business decision",
+    "Do not resume DataCo/EAGLE without primary-source evidence resolving the target-formula ambiguity"
+  ],
+  "evidence_artifacts": [
+    "reports/generated/final_release/HASEBHA_SINGLE_VENDOR_FULFILLMENT_FINAL_REPORT.md",
+    "reports/generated/final_release/HASEBHA_SINGLE_VENDOR_FULFILLMENT_SCORECARD.json",
+    "reports/generated/olist_v3_multistage/OLIST_SELLER_SLA_PRODUCTION_SIMULATION.json",
+    "reports/generated/olist_v3_multistage/PRODUCTION_PARITY_MODEL_COMPARISON.json",
+    "reports/generated/olist_v3_multistage/SELLER_SLA_SINGLE_VENDOR_PARITY_REAUDIT.json",
+    "reports/generated/olist_v3_multistage/HASEBHA_SHIPPING_SLA_PRODUCT_REQUIREMENT.json",
+    "reports/generated/dataco/DATACO_TARGET_FORENSIC_CORRECTION.json",
+    "reports/generated/arabic_sota/ARABIC_FINAL_DECISION.json",
+    "reports/checkpoints/overnight/RESUME_STATE.json",
+    "medusa-app/commercepilot-medusa/apps/backend/src/subscribers/order-placed.ts",
+    "live PostgreSQL database (direct SQL queries, this session, database left unmodified)",
+    "git status / git diff --name-only (this session)"
+  ]
+}

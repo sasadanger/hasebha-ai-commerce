@@ -1,0 +1,57 @@
+{
+  "experiment_matrix": {
+    "protocol": "identical to scripts/olist_v3_production_parity_model.py: 96,380-row canonical cohort, target SELLER_HANDOFF_SLA_BREACH, 7 month-buckets, rolling prequential over 5 evaluated periods, LightGBM(300, lr=0.05, leaves=31, seed=42) unless stated; frozen tracks untouched",
+    "phases": {
+      "PHASE_7_ABLATION": [
+        {"id": "AB_FULL_23", "features": "all 23 frozen research features", "mean_auc": 0.7686, "worst": 0.6685},
+        {"id": "AB_SELLER_HIST_ONLY", "features": "8 seller-history features only", "mean_auc": 0.7568, "worst": 0.6430},
+        {"id": "AB_NO_SELLER_HIST", "features": "P + deadline + installments", "mean_auc": 0.5666, "worst": 0.5313},
+        {"id": "AB_NO_SELLER_HIST_NO_DEADLINE", "features": "P + installments", "mean_auc": 0.5534, "worst": 0.5243},
+        {"id": "AB_NO_SELLER_HIST_NO_INSTALL", "features": "P + deadline", "mean_auc": 0.5683, "worst": 0.5341},
+        {"id": "AB_DEADLINE_ONLY", "features": "days_to_shipping_deadline only", "mean_auc": 0.5251, "worst": 0.5048},
+        {"id": "P_BASELINE_REPRO", "features": "13 MODE_A", "mean_auc": 0.5540, "worst": 0.5270}
+      ],
+      "PHASE_5_NEW_FEATURES": [
+        {"id": "P_GEO", "added": "geo_dist_km, geo_lat_diff, geo_lng_diff", "mean_auc": 0.5528, "delta_vs_P": -0.0012, "paired_last_period_delta": -0.0072},
+        {"id": "P_CUST", "added": "cust_prior_orders, cust_is_repeat, cust_tenure_days, cust_prior_late_rate, cust_prior_observed_orders", "mean_auc": 0.5563, "delta_vs_P": 0.0023},
+        {"id": "P_CAT", "added": "product_category_code", "mean_auc": 0.5678, "delta_vs_P": 0.0138, "paired_last_period_delta": -0.0009, "note": "best single gain, not stable in final period"},
+        {"id": "P_PRICE", "added": "item_price_mean, item_price_max, freight_per_item", "mean_auc": 0.5542, "delta_vs_P": 0.0002},
+        {"id": "P_GEO_CUST", "mean_auc": 0.5551},
+        {"id": "P_ALL", "mean_auc": 0.5647, "delta_vs_P": 0.0107}
+      ],
+      "PHASE_6_MODEL_FAMILY": [
+        {"family": "logistic_regression", "mean_auc": 0.5487},
+        {"family": "random_forest", "mean_auc": 0.5521},
+        {"family": "hist_gradient_boosting", "mean_auc": 0.5537},
+        {"family": "xgboost", "mean_auc": 0.5538},
+        {"family": "catboost", "mean_auc": 0.5547},
+        {"family": "lightgbm (incumbent)", "mean_auc": 0.5647}
+      ],
+      "PHASE_4_DECOMPOSITION": {
+        "univariate_auc_highlights": {"seller_breach_rate_90d": 0.7328, "seller_handling_mean_30d": 0.7312, "seller_past_breach_rate_expanding": 0.7291, "volume_cm3": 0.5405, "weight_g": 0.5403, "payment_value": 0.5385, "geo_dist_km": 0.5008, "cust_prior_late_rate": 0.5005},
+        "permutation_importance_top5_final_period": {"volume_cm3": 0.0420, "weight_g": 0.0309, "item_price_mean": 0.0279, "purchase_hour": 0.0134, "total_price": 0.0120}
+      },
+      "PHASE_9_SAMPLE_SIZE": {
+        "method": "Hanley-McNeil AUC CI, prevalence 0.0913",
+        "minimum": {"n_positive": 150, "n_orders": 1650, "ci_halfwidth": 0.05},
+        "recommended": {"n_positive": 410, "n_orders": 4500, "ci_halfwidth": 0.03}
+      }
+    },
+    "rules_compliance": {
+      "test_set manipulated": false,
+      "hyperparameter tuning on test": false,
+      "target changed": false,
+      "business data invented": false,
+      "SLA invented": false,
+      "future information used": false,
+      "single random split reported as main result": false,
+      "frozen tracks modified": false,
+      "negative results preserved": true
+    },
+    "reproducibility": {
+      "script": "scripts/forensics/production_model_forensics.py",
+      "seed": 42,
+      "raw_outputs": "reports/generated/olist_v3_multistage/forensics/FORENSIC_EXPERIMENT_RESULTS.json"
+    }
+  }
+}

@@ -24,6 +24,41 @@ OLIST_EXPERIMENT_ID = "olist-phase2a-strict-core-v1"
 OLIST_RISK_THRESHOLD = 0.1293
 OLIST_RISK_THRESHOLD_SOURCE = "reports/checkpoints/olist_integration_audit_2026-08-11/CURRENT_STATE.md (research_threshold)"
 
+SELLER_SLA_MODEL_PATH = (
+    REPO_ROOT / "artifacts/experiments/olist_v3_multistage/seller_sla_lgbm.txt"
+)
+SELLER_SLA_MODEL_SHA256 = "caf759bb4966b277e6d4ed626304dc14846d55910ffd1ad89374dfd070deded4"
+SELLER_SLA_CALIBRATOR_PATH = (
+    REPO_ROOT / "artifacts/experiments/olist_v3_multistage/seller_sla_calibrator.pkl"
+)
+SELLER_SLA_MODEL_VERSION = "olist_seller_sla_v1"
+SELLER_SLA_HIGH_THRESHOLD = 0.2079207920792079
+SELLER_SLA_MEDIUM_THRESHOLD = 0.09728656518861681
+SELLER_SLA_THRESHOLD_SOURCE = "reports/generated/olist_v3_multistage/SELLER_SLA_OPERATING_POINTS.json (historical temporal OOF dev predictions, calibrated, never the exposed stress block)"
+
+# Production-parity model (Gates 3/6/8) -- a DIFFERENT, weaker, 13-feature
+# model trained only on features genuinely available in a single-vendor
+# Medusa store (see SELLER_SLA_SINGLE_VENDOR_PARITY_REAUDIT.json). This is
+# the SHADOW-MODE model; the 22-feature SELLER_SLA_* config above remains the
+# RESEARCH_OFFLINE_ONLY model and is never used for live Medusa scoring.
+PRODUCTION_PARITY_MODEL_PATH = (
+    REPO_ROOT / "artifacts/experiments/olist_v3_multistage/production_parity_lgbm.txt"
+)
+PRODUCTION_PARITY_MODEL_SHA256 = "3457cf09f47afbb8b186bbbb7a893cf71948763a810d01ac663929ece5b4e5a9"
+PRODUCTION_PARITY_CALIBRATOR_PATH = (
+    REPO_ROOT / "artifacts/experiments/olist_v3_multistage/production_parity_calibrator.pkl"
+)
+PRODUCTION_PARITY_MODEL_VERSION = "olist_production_parity_seller_sla_v1"
+PRODUCTION_PARITY_HIGH_THRESHOLD = 0.5127853456955104
+PRODUCTION_PARITY_MEDIUM_THRESHOLD = 0.2512329802358225
+PRODUCTION_PARITY_THRESHOLD_SOURCE = "reports/generated/olist_v3_multistage/PRODUCTION_PARITY_OPERATING_POINTS.json"
+# Honest strength label -- this model's temporal signal (mean AUC ~0.555,
+# worst ~0.529) is WEAK, materially below the 22-feature research model
+# (~0.77). Wired in SHADOW MODE for first-party data collection ONLY --
+# never presented or used as a validated production risk signal. See
+# PRODUCTION_PARITY_MODEL_COMPARISON.json and the final integration report.
+PRODUCTION_PARITY_SIGNAL_STRENGTH = "WEAK"
+
 DECISION_ENGINE_CONFIG_PATH = REPO_ROOT / "configs/decision_engine_rules.yaml"
 
 NLP_CHAMPION_REGISTRY_PATH = REPO_ROOT / "configs/nlp_champion_registry.yaml"

@@ -25,6 +25,8 @@ def ready(request: Request) -> ReadyResponse:
     nlp_service = getattr(request.app.state, "nlp_service", None)
     checks = {
         "fulfillment_risk_model_loaded": getattr(request.app.state, "fulfillment_service", None) is not None,
+        "seller_sla_risk_model_loaded": getattr(request.app.state, "seller_sla_service", None) is not None,
+        "production_parity_seller_sla_shadow_model_loaded": getattr(request.app.state, "production_parity_seller_sla_service", None) is not None,
         "decision_engine_config_loaded": getattr(request.app.state, "decision_config", None) is not None,
         "nlp_registry_loaded": nlp_service is not None,
         "nlp_E_mpold_marbert_loadable": bool(nlp_service and nlp_service.is_loadable("E_MARBERT")),

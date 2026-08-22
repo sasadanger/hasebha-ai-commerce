@@ -223,6 +223,178 @@ function statusFromAiFailure(result: { rejected: boolean; timedOut: boolean }): 
   return "AI_UNAVAILABLE"
 }
 
+/**
+ * SHADOW-MODE production-parity Seller-SLA feature resolution.
+ *
+ * Distinct from resolveOlistFeatures() above: that one resolves the 2
+ * timing fields the FROZEN V1 model needs. This resolves the 9 real,
+ * genuinely-available fields the NEW production-parity model needs (see
+ * commerce-pilot-ai/reports/generated/olist_v3_multistage/
+ * SELLER_SLA_SINGLE_VENDOR_PARITY_REAUDIT.json for the audit this follows).
+ *
+ * `same_zone` is resolved via resolveSingleStoreShipFromProvince() -- a real
+ * comparison between the customer's shipping province and the store's
+ * ship-from province, valid when the store has exactly one configured stock
+ * location (the expected single-vendor case). It is never asserted `true`
+ * without both real provinces being known and matching; fabricating this
+ * boolean would violate the project's "no fake feature-parity mapping" rule.
+ */
+type ProductionParityFeatureResolution =
+  | {
+      status: "AVAILABLE_NOW"
+      purchaseTimestamp: string
+      nItems: number
+      nDistinctProducts: number
+      nCategories: number
+      totalPrice: number
+      totalFreight: number
+      weightG: number
+      volumeCm3: number
+      paymentValue: number
+      sameZone: boolean
+    }
+  | { status: "UNAVAILABLE_AT_EVENT_TIME"; reason: string }
+
+/**
+ * Resolves the store's ship-from province at T0 (order-placement time),
+ * WITHOUT relying on order.fulfillments -- a fulfillment record does not
+ * exist yet at order.placed time (it is created later, at pack/ship), so
+ * `fulfillments.location_id` is never populated this early. Fabricating a
+ * ship-from guess from a not-yet-existent fulfillment would violate this
+ * project's "no fake feature values" rule.
+ *
+ * Instead this queries the StockLocation module directly (a T0-available,
+ * real store-configuration fact, not an order-derived one). If the store has
+ * exactly ONE stock location -- the expected, common case for a single-vendor
+ * deployment like HASEBHA -- its address province is the legitimate ship-from
+ * zone for every order. If the store has zero or more than one location, this
+ * honestly returns null (UNAVAILABLE) rather than guessing which location
+ * will eventually fulfill this specific order.
+ */
+async function resolveSingleStoreShipFromProvince(
+  container: SubscriberArgs<unknown>["container"]
+): Promise<string | null> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const { data: locations } = await query.graph({
+    entity: "stock_location",
+    fields: ["id", "address.province"],
+  })
+  if (!locations || locations.length !== 1) {
+    return null
+  }
+  const province = (locations[0] as { address?: { province?: string | null } }).address?.province
+  return province ?? null
+}
+
+async function resolveProductionParityFeatures(
+  container: SubscriberArgs<unknown>["container"],
+  orderId: string
+): Promise<ProductionParityFeatureResolution> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const { data } = await query.graph({
+    entity: "order",
+    filters: { id: orderId },
+    fields: [
+      "id",
+      "created_at",
+      "item_total",
+      "shipping_total",
+      "shipping_address.province",
+      "items.quantity",
+      "items.product_id",
+      "items.product.weight",
+      "items.product.length",
+      "items.product.height",
+      "items.product.width",
+      "items.product.categories.id",
+      "payment_collections.payments.amount",
+      "payment_collections.payments.canceled_at",
+    ],
+  })
+  const order = data[0] as
+    | {
+        created_at?: string
+        item_total?: number
+        shipping_total?: number
+        shipping_address?: { province?: string }
+        items?: Array<{
+          quantity?: number
+          product_id?: string
+          product?: {
+            weight?: number | null
+            length?: number | null
+            height?: number | null
+            width?: number | null
+            categories?: Array<{ id?: string }>
+          }
+        }>
+        payment_collections?: Array<{ payments?: Array<{ amount?: number; canceled_at?: string }> }>
+      }
+    | undefined
+
+  if (!order || !order.created_at) {
+    return { status: "UNAVAILABLE_AT_EVENT_TIME", reason: "order or order.created_at not found via query.graph" }
+  }
+  const items = order.items ?? []
+  if (items.length === 0) {
+    return { status: "UNAVAILABLE_AT_EVENT_TIME", reason: "order has no items at order.placed time" }
+  }
+
+  const nItems = items.reduce((sum, it) => sum + (it.quantity ?? 0), 0) || items.length
+  const distinctProductIds = new Set(items.map((it) => it.product_id).filter(Boolean))
+  const distinctCategoryIds = new Set(
+    items.flatMap((it) => (it.product?.categories ?? []).map((c) => c.id).filter(Boolean))
+  )
+
+  // Weight/volume: real product dimension fields, summed across line items.
+  // A null dimension on a given product is a real, honest data-quality gap
+  // (not every catalog populates these) -- recorded as 0 for that line, not
+  // fabricated as a nonzero guess, consistent with the parity re-audit.
+  let weightG = 0
+  let volumeCm3 = 0
+  for (const it of items) {
+    const qty = it.quantity ?? 1
+    const w = it.product?.weight ?? 0
+    const l = it.product?.length ?? 0
+    const h = it.product?.height ?? 0
+    const wd = it.product?.width ?? 0
+    weightG += w * qty
+    volumeCm3 += l * h * wd * qty
+  }
+
+  const payments = (order.payment_collections ?? []).flatMap((pc) => pc.payments ?? [])
+  const activePayments = payments.filter((p) => !p.canceled_at)
+  const paymentValue = activePayments.reduce((sum, p) => sum + (p.amount ?? 0), 0)
+
+  // same_zone: real comparison between the customer's shipping province and
+  // the store's ship-from province (resolveSingleStoreShipFromProvince,
+  // T0-available -- see that function's own docstring for why it does NOT
+  // use order.fulfillments, which do not exist yet at order.placed time).
+  // If the ship-from province cannot be determined (zero or multiple stock
+  // locations) or the customer province is missing, this is recorded as
+  // `false` -- the same conservative default as before -- but the REASON is
+  // now an honestly-resolved "unknown, so not asserted true" rather than a
+  // permanently hardcoded stub. Never asserted `true` without both real
+  // provinces being known and matching.
+  const storeProvince = await resolveSingleStoreShipFromProvince(container)
+  const customerProvince = order.shipping_address?.province ?? null
+  const sameZone = storeProvince !== null && customerProvince !== null && storeProvince === customerProvince
+
+  return {
+    status: "AVAILABLE_NOW",
+    purchaseTimestamp: new Date(order.created_at).toISOString(),
+    nItems,
+    nDistinctProducts: Math.max(distinctProductIds.size, 1),
+    nCategories: Math.max(distinctCategoryIds.size, 1),
+    totalPrice: order.item_total ?? 0,
+    totalFreight: order.shipping_total ?? 0,
+    weightG,
+    volumeCm3,
+    paymentValue,
+    sameZone,
+  }
+}
+
 export default async function orderPlacedAiHandler({
   event: { data },
   container,
@@ -354,6 +526,89 @@ export default async function orderPlacedAiHandler({
       `(${risk.risk_class}) -> decision=${decision.action} priority=${decision.priority} ` +
       `reason_codes=${decision.reason_codes.join(",")}`
   )
+
+  // SHADOW MODE ONLY: scores the new production-parity Seller-SLA model
+  // (see PRODUCTION_PARITY_MODEL_COMPARISON.json -- WEAK signal, mean AUC
+  // ~0.555) purely for first-party feedback-dataset collection. This call
+  // is fully independent of, and never gates, the V1 decision above: any
+  // failure here is logged and swallowed, never surfaced to the customer or
+  // to order processing, and its result is never read by the Decision
+  // Engine or any automated action. Persisted under a SEPARATE metadata key
+  // (`commercepilot_ai_shadow_seller_sla`) so it can never be confused with
+  // the live V1 `commercepilot_ai` record above.
+  try {
+    const shadowFeatures = await resolveProductionParityFeatures(container, data.id)
+    if (shadowFeatures.status === "AVAILABLE_NOW") {
+      const shadowResult = await postJsonWithRetry<{
+        seller_sla_breach_probability: number
+        risk_level: string
+        model_version: string
+        model_artifact_sha256: string
+        persisted: boolean
+      }>("/v1/fulfillment/seller-sla-shadow", {
+        order_ref: data.id,
+        purchase_timestamp: shadowFeatures.purchaseTimestamp,
+        n_items: shadowFeatures.nItems,
+        n_distinct_products: shadowFeatures.nDistinctProducts,
+        n_categories: shadowFeatures.nCategories,
+        total_price: shadowFeatures.totalPrice,
+        total_freight: shadowFeatures.totalFreight,
+        weight_g: shadowFeatures.weightG,
+        volume_cm3: shadowFeatures.volumeCm3,
+        payment_value: shadowFeatures.paymentValue,
+        same_zone: shadowFeatures.sameZone,
+      })
+      const existingAfterMainCall = (
+        (await orderModuleService.retrieveOrder(data.id)).metadata ?? {}
+      ) as Record<string, unknown>
+      if (shadowResult.ok) {
+        await orderModuleService.updateOrders(data.id, {
+          metadata: {
+            ...existingAfterMainCall,
+            commercepilot_ai_shadow_seller_sla: {
+              mode: "SHADOW",
+              status: "COMPLETED",
+              order_id: data.id,
+              seller_sla_breach_probability: shadowResult.data.seller_sla_breach_probability,
+              risk_level: shadowResult.data.risk_level,
+              model_version: shadowResult.data.model_version,
+              model_artifact_sha256: shadowResult.data.model_artifact_sha256,
+              persisted_by_ai_service: shadowResult.data.persisted,
+              processed_at: new Date().toISOString(),
+            },
+          },
+        })
+      } else {
+        logger.warn(
+          `[commercepilot-ai-shadow] order ${data.id}: shadow seller-SLA call failed: ${shadowResult.error}`
+        )
+        await orderModuleService.updateOrders(data.id, {
+          metadata: {
+            ...existingAfterMainCall,
+            commercepilot_ai_shadow_seller_sla: {
+              mode: "SHADOW",
+              status: statusFromAiFailure(shadowResult),
+              order_id: data.id,
+              error: shadowResult.error,
+              processed_at: new Date().toISOString(),
+            },
+          },
+        })
+      }
+    } else {
+      logger.info(
+        `[commercepilot-ai-shadow] order ${data.id}: insufficient features for shadow scoring (${shadowFeatures.reason})`
+      )
+    }
+  } catch (err) {
+    // Structured, non-silent failure logging (mission-required): never a
+    // bare swallow. This never rethrows -- shadow scoring must not affect
+    // order placement in any way.
+    logger.error(
+      `[commercepilot-ai-shadow] order ${data.id}: unexpected error during shadow scoring, ` +
+        `order processing unaffected: ${err instanceof Error ? err.stack ?? err.message : String(err)}`
+    )
+  }
 }
 
 export const config: SubscriberConfig = {

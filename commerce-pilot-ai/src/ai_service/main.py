@@ -17,6 +17,9 @@ from src.ai_service.services.decision_engine import DecisionEngineConfig
 from src.ai_service.services.fulfillment_risk import FulfillmentRiskService
 from src.ai_service.services.nlp_inference import NlpInferenceService
 from src.ai_service.services.recommendation_engine import RecommendationEngineService
+from src.ai_service.services.seller_sla_risk import SellerSlaRiskService
+from src.ai_service.services.production_parity_seller_sla import ProductionParitySellerSlaService
+from src.ai_service.services.prediction_feedback_store import PredictionFeedbackStore
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +41,24 @@ async def lifespan(app: FastAPI):
     except Exception:
         logger.exception("failed to load fulfillment risk model")
         app.state.fulfillment_service = None
+
+    try:
+        app.state.seller_sla_service = SellerSlaRiskService()
+    except Exception:
+        logger.exception("failed to load seller-SLA risk model")
+        app.state.seller_sla_service = None
+
+    try:
+        app.state.production_parity_seller_sla_service = ProductionParitySellerSlaService()
+    except Exception:
+        logger.exception("failed to load production-parity seller-SLA shadow model")
+        app.state.production_parity_seller_sla_service = None
+
+    try:
+        app.state.seller_sla_feedback_store = PredictionFeedbackStore()
+    except Exception:
+        logger.exception("failed to init seller-SLA feedback store")
+        app.state.seller_sla_feedback_store = None
 
     try:
         app.state.decision_config = DecisionEngineConfig.load()

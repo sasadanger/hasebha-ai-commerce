@@ -1,0 +1,51 @@
+{
+  "gate": "PRODUCTION_MODEL_FORENSIC_SCORECARD",
+  "date": "2026-08-22",
+  "protocol_reproduction": {
+    "frozen_full_23_mean_auc": 0.7702,
+    "reproduced_full_23_mean_auc": 0.7686,
+    "frozen_model_p_mean_auc": 0.5551,
+    "reproduced_model_p_mean_auc": 0.5540,
+    "verdict": "REPRODUCED (protocol sound)"
+  },
+  "ablation_collapse_attribution": {
+    "full_23": 0.7686,
+    "seller_history_only": 0.7568,
+    "remove_seller_history_delta": -0.202,
+    "remove_days_to_shipping_deadline_delta": -0.013,
+    "remove_n_installments_delta": -0.002,
+    "conclusion": "94% of the 0.77->0.555 collapse is the seller-history block; deadline needs a business SLA decision"
+  },
+  "phase4_decomposition": {
+    "max_univariate_auc_model_p_features": 0.5404,
+    "max_univariate_auc_feature": "volume_cm3",
+    "top_permutation_importance": {"volume_cm3": 0.042, "weight_g": 0.031, "item_price_mean": 0.028},
+    "ruling": "WEAK SIGNAL IS GENUINE, not protocol/imbalance/calibration/model-family artifact"
+  },
+  "new_feature_experiments": {
+    "P_GEO": {"mean_auc": 0.5528, "delta": -0.001, "verdict": "NO_SIGNAL"},
+    "P_CUST": {"mean_auc": 0.5563, "delta": 0.002, "verdict": "NO_SIGNAL"},
+    "P_CAT": {"mean_auc": 0.5678, "delta": 0.014, "verdict": "MARGINAL_UNSTABLE"},
+    "P_PRICE": {"mean_auc": 0.5542, "delta": 0.000, "verdict": "NO_SIGNAL"},
+    "P_ALL": {"mean_auc": 0.5647, "delta": 0.011, "verdict": "NO_MATERIAL_GAIN"}
+  },
+  "model_family_on_best_legitimate_set": {
+    "lightgbm": 0.5647, "catboost": 0.5547, "xgboost": 0.5538,
+    "histgradientboosting": 0.5537, "random_forest": 0.5521, "logistic_regression": 0.5487,
+    "verdict": "ARCHITECTURE_NOT_BOTTLENECK"
+  },
+  "first_party_data_requirements": {
+    "prevalence_assumed": 0.0913,
+    "minimum": {"positive_events": 150, "orders": 1650, "ci_halfwidth": 0.05},
+    "recommended": {"positive_events": 410, "orders": 4500, "ci_halfwidth": 0.03},
+    "months_at_30_orders_per_day": {"minimum": 2, "recommended": 5}
+  },
+  "options_ranking": ["D", "C", "B", "A", "E"],
+  "final_decision": "RED",
+  "final_decision_rationale": "Production signal genuinely weak; seller-history features (94% of research AUC) structurally unavailable; no legitimate feature or model-family change materially improves it; improvement requires first-party data accumulation and a business SLA decision.",
+  "evidence_files": [
+    "scripts/forensics/production_model_forensics.py",
+    "reports/generated/olist_v3_multistage/forensics/FORENSIC_EXPERIMENT_RESULTS.json",
+    "reports/generated/olist_v3_multistage/forensics/FORENSIC_EXPERIMENT_SUMMARY.json"
+  ]
+}
